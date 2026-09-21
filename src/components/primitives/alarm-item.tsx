@@ -1,6 +1,6 @@
 import type { AlarmSeverity } from "@/domain/types";
 import { SeverityBadge } from "@/components/primitives/status";
-import { cn } from "@/lib/cn";
+import { Button } from "@/components/ui/button";
 
 export interface AlarmItemData {
   severity: AlarmSeverity;
@@ -13,36 +13,34 @@ export interface AlarmItemData {
 export function AlarmItem({ alarm }: { alarm: AlarmItemData }) {
   const color = `var(--sev-${alarm.severity})`;
   return (
-    <div
-      className={cn(
-        "flex items-start gap-3 rounded-lg border border-border bg-surface-2/40 px-3.5 py-3",
-      )}
-      style={{
-        boxShadow: `inset 3px 0 0 0 ${color}`,
-      }}
-    >
+    <div className="flex items-start gap-3 rounded-lg border border-border bg-elevated/40 p-3">
+      <span
+        className="mt-1.5 size-2 shrink-0 rounded-full"
+        style={{ backgroundColor: color }}
+      />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <SeverityBadge severity={alarm.severity} />
-          <span className="code text-xs text-faint">{alarm.code}</span>
+          <span className="code text-xs text-muted-foreground">
+            {alarm.code}
+          </span>
+          <span className="num ml-auto text-[11px] whitespace-nowrap text-muted-foreground">
+            {alarm.time}
+          </span>
         </div>
-        <p className="mt-1.5 text-[13px] leading-snug text-muted">
+        <p className="mt-1.5 text-[13px] leading-snug text-foreground/90">
           {alarm.message}
         </p>
-      </div>
-      <div className="flex shrink-0 flex-col items-end gap-2">
-        <span className="num text-[11px] whitespace-nowrap text-faint">
-          {alarm.time}
-        </span>
-        {alarm.acknowledged ? (
-          <span className="text-[11px] text-faint">Acked</span>
+        {!alarm.acknowledged ? (
+          <div className="mt-2.5">
+            <Button variant="outline" size="sm" className="h-7 px-2.5 text-xs">
+              Acknowledge
+            </Button>
+          </div>
         ) : (
-          <button
-            type="button"
-            className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] font-medium text-muted transition-colors hover:border-border-strong hover:text-text"
-          >
-            Ack
-          </button>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Acknowledged · auto-clears when resolved
+          </p>
         )}
       </div>
     </div>

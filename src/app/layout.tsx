@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,20 +12,18 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0e17",
+  themeColor: "#0a0a0a",
   colorScheme: "dark",
 };
 
-/*
- * Dark-first control surface. Theme is fixed to dark for now; a per-tenant
- * brand accent and an opt-in light theme (data-theme="light") plug in here
- * in Step 3. Fonts use a system stack (no runtime/build network dependency,
- * per the restrained-network constraint); a self-hosted variable font is a
- * Step 3 typography decision.
- */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" data-theme="dark" className="h-full">
+    <html
+      lang="en"
+      data-theme="dark"
+      className={`${GeistSans.variable} ${GeistMono.variable} h-full`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full">{children}</body>
     </html>
   );

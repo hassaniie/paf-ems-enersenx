@@ -1,112 +1,118 @@
 /*
- * Enersenx EMS — Design Tokens
- * =============================
- * TWO LAYERS, deliberately separated (docs/domain-model.md §10):
+ * Enersenx EMS — Design Tokens (Atlas/ReUI-aligned)
+ * =================================================
+ * Reproduces the ReUI "Atlas" design system locally (reui.io is blocked by
+ * this environment's network policy, so the packages can't be pulled here —
+ * these tokens mirror ReUI's neutral shadcn-compatible theme 1:1 so real ReUI
+ * components would drop in unchanged if the registry is later allowlisted).
  *
- *   1. SEMANTIC + STATUS  → constant across every tenant. Safety-critical
- *      status colors live here and are NEVER themed.
- *   2. BRAND              → per-tenant, overridable. Chrome/accent only.
- *      Override per tenant on a wrapper: style="--brand-accent:#c8a24a".
+ * TWO LAYERS (docs/domain-model.md §10):
+ *   1. NEUTRAL + STATUS  → constant across tenants. Safety-critical status
+ *      colors live here and are NEVER themed.
+ *   2. BRAND             → per-tenant, overridable. Restrained, like Atlas.
  *
- * Dark-first control surface (default = dark). Light theme opt-in via
- * :root[data-theme="light"].
- *
- * COLOR VALUES are validated with the dataviz method (scripts/validate_palette):
- * the categorical series pass all six checks on the dark surface #111725; the
- * status palette is the reference status set (good/warning/serious/critical).
+ * Dark-first; light is first-class via :root[data-theme="light"].
+ * Status + categorical colors are validated with the dataviz method.
  */
 
 :root {
-  /* ---- scale primitives -------------------------------------------------- */
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
+  --radius: 0.75rem;
 
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
-    Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  --font-mono:
-    ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas,
-    monospace;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* ======================================================================= */
-  /* LAYER 1 — SEMANTIC + STATUS (constant, never themed)                    */
-  /* ======================================================================= */
+  /* ===================== NEUTRAL (shadcn/ReUI convention) ================= */
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #141414;
+  --card-foreground: #fafafa;
+  --popover: #1a1a1a;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #0a0a0a;
+  --secondary: #232323;
+  --secondary-foreground: #fafafa;
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1a1;
+  --accent: #262626;
+  --accent-foreground: #fafafa;
+  --border: #262626;
+  --input: #2a2a2a;
+  --ring: #525252;
 
-  /* Surfaces (dark-first). --surface is the validated chart surface. */
-  --app-bg: #080b12;
-  --surface: #111725;
-  --surface-2: #172032;
-  --surface-3: #1e2940;
-  --border: #212c42;
-  --border-strong: #30405f;
+  /* nested / elevated surface (icon squares, table header, chips) */
+  --elevated: #1f1f1f;
 
-  /* Text */
-  --text: #eaeff7;
-  --text-muted: #9aa8c0;
-  --text-faint: #647189;
-  --text-inverse: #080b12;
+  /* ===================== STATUS (never themed) ============================ */
+  --status-online: #16a34a;
+  --status-stale: #f5b021;
+  --status-offline: #8a8a8a;
+  --status-faulty: #ef8b57;
+  --status-awaiting: #5b7fbf;
 
-  /* Meter status (domain-model §7) — SAFETY CRITICAL, never themed */
-  --status-online: #0ca30c; /* good */
-  --status-stale: #fab219; /* warning */
-  --status-offline: #7a8699; /* neutral: no signal */
-  --status-faulty: #ec835a; /* serious: implausible readings */
-  --status-awaiting: #5f7fb5; /* configured, never reported (shown dashed) */
+  --sev-critical: #e5484d;
+  --sev-warning: #f5b021;
+  --sev-info: #4c8dff;
 
-  /* Alarm severity — SAFETY CRITICAL, never themed */
-  --sev-critical: #d03b3b;
-  --sev-warning: #fab219;
-  --sev-info: #3987e5;
+  --flow-import: var(--foreground);
+  --flow-export: #9c7cf4;
 
-  /* Power flow (domain-model §5) */
-  --flow-import: var(--text); /* neutral: normal import */
-  --flow-export: #9085e9; /* export / reverse flow — distinct, not a warning */
+  --delta-up: #16a34a;
+  --delta-down: #e5484d;
 
-  /* Delta cues */
-  --delta-up: #0ca30c;
-  --delta-down: #d03b3b;
-
-  /* Foreground placed on a saturated status/brand fill */
   --on-solid: #ffffff;
 
-  /* Data-viz categorical series (validated, dark steps) */
-  --viz-1: #3987e5; /* blue */
-  --viz-2: #d95926; /* orange */
-  --viz-3: #199e70; /* aqua */
-  --viz-4: #c98500; /* yellow */
-  --viz-5: #d55181; /* magenta */
-  --viz-6: #008300; /* green */
-  --viz-7: #9085e9; /* violet */
-  --viz-8: #e66767; /* red */
+  /* ===================== DATA-VIZ (validated dark steps) ================== */
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-7: #9085e9;
+  --viz-8: #e66767;
 
-  /* ======================================================================= */
-  /* LAYER 2 — BRAND (per-tenant, overridable)                               */
-  /* ======================================================================= */
-
-  --brand-accent: #4c8dff; /* Enersenx product default */
-  --brand-accent-hover: #6ba0ff;
-  --brand-accent-fg: #ffffff;
-  /* soft brand wash for selected/hover chrome */
-  --brand-soft: #4c8dff1f;
+  /* ===================== BRAND (per-tenant, restrained) =================== */
+  --brand: #4c8dff;
+  --brand-foreground: #ffffff;
 }
 
-/* Light theme (opt-in stub — expanded when a light control mode is needed) */
 :root[data-theme="light"] {
-  --app-bg: #f5f7fb;
-  --surface: #ffffff;
-  --surface-2: #f1f4fa;
-  --surface-3: #e7ecf5;
-  --border: #dde3ee;
-  --border-strong: #c6d0e0;
+  --background: #fbfbfb;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #171717;
+  --muted: #f6f6f6;
+  --muted-foreground: #737373;
+  --accent: #f1f1f2;
+  --accent-foreground: #171717;
+  --border: #e6e6e6;
+  --input: #e6e6e6;
+  --ring: #a3a3a3;
 
-  --text: #121a27;
-  --text-muted: #4c5a72;
-  --text-faint: #7a889f;
-  --text-inverse: #ffffff;
+  --elevated: #f4f4f5;
 
-  --flow-import: var(--text);
+  --status-online: #15803d;
+  --status-offline: #71717a;
+  --status-faulty: #d9743f;
+  --status-awaiting: #3f66b0;
+
+  /* light-mode categorical steps (validated set) */
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-4: #eda100;
+  --viz-5: #e87ba4;
+  --viz-6: #008300;
+  --viz-7: #4a3aa7;
+  --viz-8: #e34948;
+
+  --flow-export: #6d4fd6;
   --on-solid: #ffffff;
-  --brand-soft: #4c8dff14;
 }

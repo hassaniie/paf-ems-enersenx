@@ -1,34 +1,31 @@
 /*
- * Minimal sparkline (inline SVG). Thin 2px line (non-scaling), soft area fill,
- * baseline-anchored — the dataviz mark spec at tile scale. Responsive: fills
- * its container width. Decorative context only; full interactive charts
- * (hover/crosshair) live on the Analytics screen.
+ * Small line + soft area, ReUI/Atlas KPI-card style. Pure SVG (no client JS),
+ * responsive width, 2px non-scaling stroke. A real trend line, not decoration.
  */
-export function Sparkline({
+export function MiniArea({
   data,
-  color = "var(--brand-accent)",
-  height = 30,
+  color = "var(--brand)",
+  height = 40,
 }: {
   data: number[];
   color?: string;
   height?: number;
 }) {
   if (data.length < 2) return null;
-  const VW = 100; // internal coordinate width; SVG scales to container
+  const VW = 100;
   const min = Math.min(...data);
   const max = Math.max(...data);
   const span = max - min || 1;
-  const pad = 2;
-  const w = VW - pad * 2;
+  const pad = 3;
   const h = height - pad * 2;
   const pts = data.map((v, i) => {
-    const x = pad + (i / (data.length - 1)) * w;
+    const x = (i / (data.length - 1)) * VW;
     const y = pad + h - ((v - min) / span) * h;
     return [x, y] as const;
   });
-  const line = pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
-  const area = `${pad},${height - pad} ${line} ${VW - pad},${height - pad}`;
-  const gid = `spark-${Math.abs(hash(line))}`;
+  const line = pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const area = `0,${height} ${line} ${VW},${height}`;
+  const gid = `ma-${Math.abs(hash(line))}`;
   return (
     <svg
       width="100%"
@@ -37,11 +34,11 @@ export function Sparkline({
       preserveAspectRatio="none"
       fill="none"
       aria-hidden
-      className="block"
+      className="block overflow-visible"
     >
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>

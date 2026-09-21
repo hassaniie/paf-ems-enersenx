@@ -1,84 +1,191 @@
 /*
  * Mock dashboard data for the PAF tenant — a hand-built, self-consistent
  * snapshot used until the mock simulator (Step 4) and backend exist.
- *
- * It deliberately demonstrates the FIXED model (docs/domain-model.md):
- *  - Site total is the sum of feeders (553 kW), not the faulty parent's 0
- *    that made the prototype read "1 kW".
- *  - Import vs export is explicit; CAC/CASS is exporting (reverse flow).
- *  - "Awaiting data" (configured, never reported) is distinct from offline.
+ * Demonstrates the fixed model (docs/domain-model.md): correct site total,
+ * explicit import/export, and "awaiting data" distinct from offline.
  */
 
+import { Activity, Gauge, SunMedium, Zap } from "lucide-react";
 import type { AlarmItemData } from "@/components/primitives/alarm-item";
-import type { FeederRowData } from "@/components/primitives/feeder-row";
-import type { MetricDelta } from "@/components/primitives/metric-tile";
+import type { FeederRow } from "@/components/primitives/feeder-table";
+import type { LoadPoint } from "@/components/charts/load-area";
+import type { ProgressRowData } from "@/components/primitives/progress-list";
+import type { StatCardProps } from "@/components/primitives/stat-card";
 
-export interface KpiData {
-  label: string;
-  value: string;
-  unit?: string;
-  sub?: string;
-  delta?: MetricDelta;
-  spark?: { data: number[]; color?: string };
-  valueClassName?: string;
-}
-
-export const KPIS: KpiData[] = [
+export const KPIS: StatCardProps[] = [
   {
     label: "Total Active Load",
     value: "553",
     unit: "kW",
-    sub: "Sum of all feeders",
+    icon: Zap,
     delta: { text: "4%", dir: "up" },
-    spark: { data: [420, 460, 510, 505, 540, 548, 553], color: "var(--brand-accent)" },
+    spark: {
+      data: [420, 440, 460, 470, 510, 540, 560, 553],
+      color: "var(--viz-1)",
+    },
   },
   {
     label: "Energy Today",
     value: "8.74",
     unit: "MWh",
-    sub: "Net import since 00:00 PKT",
+    icon: Activity,
     delta: { text: "2%", dir: "down", good: true },
-    spark: { data: [0, 1.2, 2.6, 3.9, 5.3, 7.0, 8.74], color: "var(--viz-1)" },
-  },
-  {
-    label: "Avg Power Factor",
-    value: "0.930",
-    sub: "2 feeders below 0.90",
-    delta: { text: "0.01", dir: "up", good: true },
+    spark: {
+      data: [0, 1.1, 2.6, 3.9, 5.3, 6.9, 7.9, 8.74],
+      color: "var(--viz-3)",
+    },
   },
   {
     label: "Grid Export Today",
     value: "160",
     unit: "kWh",
-    sub: "Net-metering credit",
+    icon: SunMedium,
     valueClassName: "text-export",
-    spark: { data: [0, 0, 12, 40, 96, 140, 160], color: "var(--flow-export)" },
+    spark: { data: [0, 0, 3, 18, 40, 32, 24, 18], color: "var(--flow-export)" },
   },
   {
-    label: "Peak Demand (MDI)",
-    value: "777",
-    unit: "kW",
-    sub: "78% of 1,000 kW sanctioned",
-  },
-  {
-    label: "Meters Online",
-    value: "4 / 10",
-    sub: "6 awaiting data",
+    label: "Avg Power Factor",
+    value: "0.930",
+    icon: Gauge,
+    statusColor: "var(--status-stale)",
+    sub: "2 feeders below 0.90 — LESCO exposure",
   },
 ];
 
-export const FEEDERS: FeederRowData[] = [
-  { name: "Iqbal Camp", code: "IC-HT-01", cls: "HT", transport: "wifi", status: "online", powerKw: 1, pf: 0.86, depth: 0 },
-  { name: "Officers Mess", code: "OM-HT-01", cls: "HT", transport: "wifi", status: "awaiting-data", depth: 0 },
-  { name: "Officers Colony / Siddiqui", code: "SC-HT-01", cls: "HT", transport: "wifi", status: "awaiting-data", depth: 0 },
-  { name: "Tech Area (Main)", code: "TA-HT-01", cls: "HT", transport: "modbus", status: "faulty", depth: 0 },
-  { name: "NASTP Delta Ph-III", code: "ND-HT-01", cls: "HT", transport: "modbus", status: "online", powerKw: 544, pf: 0.95, depth: 1 },
-  { name: "CAC / CASS", code: "CC-HT-01", cls: "HT", transport: "modbus", status: "online", powerKw: -18, pf: 0.34, depth: 2 },
-  { name: "NASTP Delta (Net)", code: "ND − CC", cls: "HT", transport: "modbus", status: "online", powerKw: 562, pf: 0.95, depth: 1, derived: true },
-  { name: "Qureshi Camp (Main)", code: "QC-HT-01", cls: "HT", transport: "lorawan", status: "awaiting-data", depth: 0 },
-  { name: "PAF Hospital LT-1", code: "PH-LT-01", cls: "LT", transport: "lorawan", status: "awaiting-data", depth: 1 },
-  { name: "PAF Hospital LT-2", code: "PH-LT-02", cls: "LT", transport: "lorawan", status: "awaiting-data", depth: 1 },
-  { name: "PAF Hospital LT-3", code: "PH-LT-03", cls: "LT", transport: "lorawan", status: "awaiting-data", depth: 1 },
+export const LOAD_SERIES: LoadPoint[] = [
+  { t: "00:00", load: 420, solar: 0 },
+  { t: "02:00", load: 440, solar: 0 },
+  { t: "04:00", load: 460, solar: 0 },
+  { t: "06:00", load: 470, solar: 3 },
+  { t: "08:00", load: 512, solar: 18 },
+  { t: "10:00", load: 540, solar: 32 },
+  { t: "12:00", load: 560, solar: 40 },
+  { t: "14:00", load: 552, solar: 24 },
+  { t: "15:00", load: 553, solar: 18 },
+];
+
+export const FEEDER_LOAD: ProgressRowData[] = [
+  {
+    label: "NASTP Delta Ph-III",
+    sub: "ND-HT-01",
+    value: "544 kW",
+    pct: 98,
+    color: "var(--viz-1)",
+  },
+  {
+    label: "CAC / CASS",
+    sub: "exporting",
+    value: "18 kW",
+    pct: 4,
+    color: "var(--flow-export)",
+  },
+  {
+    label: "Iqbal Camp",
+    sub: "IC-HT-01",
+    value: "1 kW",
+    pct: 1,
+    color: "var(--viz-3)",
+  },
+];
+
+export const FEEDERS: FeederRow[] = [
+  {
+    name: "Iqbal Camp",
+    code: "IC-HT-01",
+    cls: "HT",
+    transport: "wifi",
+    status: "online",
+    powerKw: 1,
+    pf: 0.86,
+    depth: 0,
+  },
+  {
+    name: "Officers Mess",
+    code: "OM-HT-01",
+    cls: "HT",
+    transport: "wifi",
+    status: "awaiting-data",
+    depth: 0,
+  },
+  {
+    name: "Officers Colony / Siddiqui",
+    code: "SC-HT-01",
+    cls: "HT",
+    transport: "wifi",
+    status: "awaiting-data",
+    depth: 0,
+  },
+  {
+    name: "Tech Area (Main)",
+    code: "TA-HT-01",
+    cls: "HT",
+    transport: "modbus",
+    status: "faulty",
+    depth: 0,
+  },
+  {
+    name: "NASTP Delta Ph-III",
+    code: "ND-HT-01",
+    cls: "HT",
+    transport: "modbus",
+    status: "online",
+    powerKw: 544,
+    pf: 0.95,
+    depth: 1,
+  },
+  {
+    name: "CAC / CASS",
+    code: "CC-HT-01",
+    cls: "HT",
+    transport: "modbus",
+    status: "online",
+    powerKw: -18,
+    pf: 0.34,
+    depth: 2,
+  },
+  {
+    name: "NASTP Delta (Net)",
+    code: "ND − CC",
+    cls: "HT",
+    transport: "modbus",
+    status: "online",
+    powerKw: 562,
+    pf: 0.95,
+    depth: 1,
+    derived: true,
+  },
+  {
+    name: "Qureshi Camp (Main)",
+    code: "QC-HT-01",
+    cls: "HT",
+    transport: "lorawan",
+    status: "awaiting-data",
+    depth: 0,
+  },
+  {
+    name: "PAF Hospital LT-1",
+    code: "PH-LT-01",
+    cls: "LT",
+    transport: "lorawan",
+    status: "awaiting-data",
+    depth: 1,
+  },
+  {
+    name: "PAF Hospital LT-2",
+    code: "PH-LT-02",
+    cls: "LT",
+    transport: "lorawan",
+    status: "awaiting-data",
+    depth: 1,
+  },
+  {
+    name: "PAF Hospital LT-3",
+    code: "PH-LT-03",
+    cls: "LT",
+    transport: "lorawan",
+    status: "awaiting-data",
+    depth: 1,
+  },
 ];
 
 export const ALARMS: AlarmItemData[] = [
@@ -86,14 +193,14 @@ export const ALARMS: AlarmItemData[] = [
     severity: "critical",
     code: "CC-HT-01",
     message:
-      "Power factor 0.34 sustained 30 min — below 0.80. LESCO fine exposure active; reactive compensation (capacitor bank) required.",
+      "Power factor 0.34 sustained 30 min — below 0.80. LESCO fine exposure active; capacitor bank required.",
     time: "20 Sep, 23:32",
   },
   {
     severity: "warning",
     code: "TA-HT-01",
     message:
-      "Voltage present, ~zero current for 6+ h — CT circuit fault suspected. Meter unserviceable; physical inspection required.",
+      "Voltage present, ~zero current for 6+ h — CT circuit fault suspected. Physical inspection required.",
     time: "21 Sep, 12:57",
   },
   {

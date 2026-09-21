@@ -1,44 +1,43 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
 
-/*
- * Map design tokens → Tailwind theme so utilities like `bg-surface`,
- * `text-muted`, `text-faulty`, `border-border` resolve to our tokens.
- * (Tailwind v4 CSS-first config.)
- */
+/* Map tokens → Tailwind theme (shadcn/ReUI convention + domain tokens). */
 @theme inline {
-  --color-app-bg: var(--app-bg);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-surface-3: var(--surface-3);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-
-  --color-text: var(--text);
-  --color-muted: var(--text-muted);
-  --color-faint: var(--text-faint);
-  --color-inverse: var(--text-inverse);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-elevated: var(--elevated);
 
   --color-online: var(--status-online);
   --color-stale: var(--status-stale);
   --color-offline: var(--status-offline);
   --color-faulty: var(--status-faulty);
   --color-awaiting: var(--status-awaiting);
-
   --color-critical: var(--sev-critical);
   --color-warning: var(--sev-warning);
   --color-info: var(--sev-info);
-
   --color-import: var(--flow-import);
   --color-export: var(--flow-export);
   --color-delta-up: var(--delta-up);
   --color-delta-down: var(--delta-down);
   --color-on-solid: var(--on-solid);
 
-  --color-brand: var(--brand-accent);
-  --color-brand-hover: var(--brand-accent-hover);
-  --color-brand-fg: var(--brand-accent-fg);
-  --color-brand-soft: var(--brand-soft);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
 
   --color-viz-1: var(--viz-1);
   --color-viz-2: var(--viz-2);
@@ -52,44 +51,50 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--border);
 }
 
 html {
   height: 100%;
-  color-scheme: dark;
 }
 
 body {
   min-height: 100%;
-  background: var(--app-bg);
-  color: var(--text);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/*
- * Numeric readouts (meter values, kW/kWh/PF) use tabular figures so digits
- * don't jitter as live values update. Apply `.num` to any numeric readout.
- */
+/* Tabular figures for numeric readouts that update or align in columns. */
 .num {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
 
-/* Meter/asset codes (ND-HT-01) read as identifiers, not prose. */
+/* Asset codes (ND-HT-01) read as identifiers. */
 .code {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
 }
 
-/* Thin custom scrollbars so dense panels stay clean. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-color: var(--border) transparent;
 }

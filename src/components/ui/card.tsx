@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-/** Surface container — the base of every panel. shadcn-style, our tokens. */
+/** Surface panel — ReUI/Atlas card: rounded-xl, hairline border, bg-card. */
 export function Card({
   className,
   children,
@@ -12,8 +12,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-surface",
-        "shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_1px_2px_0_rgba(0,0,0,0.30)]",
+        "rounded-xl border border-border bg-card text-card-foreground",
         className,
       )}
     >
@@ -36,16 +35,16 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        "flex items-start justify-between gap-4 border-b border-border px-5 py-3.5",
+        "flex items-start justify-between gap-4 px-5 pt-5 pb-4",
         className,
       )}
     >
       <div className="min-w-0">
-        <h2 className="text-[13px] font-semibold tracking-wide text-text">
+        <h2 className="text-[15px] leading-none font-semibold text-foreground">
           {title}
         </h2>
         {subtitle ? (
-          <p className="mt-0.5 text-xs text-faint">{subtitle}</p>
+          <p className="mt-1.5 text-[13px] text-muted-foreground">{subtitle}</p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -60,5 +59,5 @@ export function CardBody({
   className?: string;
   children: ReactNode;
 }) {
-  return <div className={cn("p-5", className)}>{children}</div>;
+  return <div className={cn("px-5 pb-5", className)}>{children}</div>;
 }

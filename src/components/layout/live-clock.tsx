@@ -12,7 +12,5 @@ export function LiveClock() {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-  return (
-    <span className="num tabular-nums text-muted">{now ?? "—"} PKT</span>
-  );
+  return <span className="num tabular-nums text-muted">{now ?? "—"} PKT</span>;
 }
