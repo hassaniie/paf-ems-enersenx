@@ -1,31 +1,27 @@
 /*
  * Enersenx EMS — Design Tokens
  * =============================
- * TWO LAYERS, deliberately separated (see docs/domain-model.md §10):
+ * TWO LAYERS, deliberately separated (docs/domain-model.md §10):
  *
- *   1. SEMANTIC + STATUS layer  → constant across every tenant.
- *      Safety-critical status colors live here and are NEVER themed.
- *      A customer's brand must not be able to make an alarm look benign.
+ *   1. SEMANTIC + STATUS  → constant across every tenant. Safety-critical
+ *      status colors live here and are NEVER themed.
+ *   2. BRAND              → per-tenant, overridable. Chrome/accent only.
+ *      Override per tenant on a wrapper: style="--brand-accent:#c8a24a".
  *
- *   2. BRAND layer              → per-tenant, overridable.
- *      Only chrome/accent (nav highlight, links, primary actions, logo).
- *      Override per tenant by setting --brand-* on a wrapper element, e.g.
- *      <div data-tenant="paf" style="--brand-accent:#c8a24a">…</div>
+ * Dark-first control surface (default = dark). Light theme opt-in via
+ * :root[data-theme="light"].
  *
- * Dark-first: this is a control surface. Dark is the default (:root).
- * A light theme is opt-in via :root[data-theme="light"] (stub below).
- *
- * NOTE: exact color values are PROVISIONAL. The status/data-viz palette is
- * finalised in Step 3 using the dataviz color method (contrast + colorblind
- * validation). Structure is final; hex values may still move.
+ * COLOR VALUES are validated with the dataviz method (scripts/validate_palette):
+ * the categorical series pass all six checks on the dark surface #111725; the
+ * status palette is the reference status set (good/warning/serious/critical).
  */
 
 :root {
-  /* ---- Scale primitives -------------------------------------------------- */
-  --radius-sm: 4px;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* ---- scale primitives -------------------------------------------------- */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
 
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
@@ -38,70 +34,79 @@
   /* LAYER 1 — SEMANTIC + STATUS (constant, never themed)                    */
   /* ======================================================================= */
 
-  /* Surfaces (dark-first) */
-  --app-bg: #0a0e17;
+  /* Surfaces (dark-first). --surface is the validated chart surface. */
+  --app-bg: #080b12;
   --surface: #111725;
   --surface-2: #172032;
-  --surface-3: #1e293e;
-  --border: #26324a;
-  --border-strong: #35456380;
+  --surface-3: #1e2940;
+  --border: #212c42;
+  --border-strong: #30405f;
 
   /* Text */
-  --text: #e8edf6;
+  --text: #eaeff7;
   --text-muted: #9aa8c0;
-  --text-faint: #64718a;
-  --text-inverse: #0a0e17;
+  --text-faint: #647189;
+  --text-inverse: #080b12;
 
-  /* Meter status (domain-model §7) — SAFETY CRITICAL, do not theme */
-  --status-online: #2fbf71; /* reporting normally */
-  --status-stale: #eab308; /* one interval missed */
-  --status-offline: #8493ad; /* comms lost (was connected) */
-  --status-faulty: #f0453f; /* readings implausible — inspect */
-  --status-awaiting: #4c86ff; /* configured, never reported yet */
+  /* Meter status (domain-model §7) — SAFETY CRITICAL, never themed */
+  --status-online: #0ca30c; /* good */
+  --status-stale: #fab219; /* warning */
+  --status-offline: #7a8699; /* neutral: no signal */
+  --status-faulty: #ec835a; /* serious: implausible readings */
+  --status-awaiting: #5f7fb5; /* configured, never reported (shown dashed) */
 
-  /* Alarm severity — SAFETY CRITICAL, do not theme */
-  --sev-critical: #f0453f;
-  --sev-warning: #eab308;
-  --sev-info: #3ba7f0;
+  /* Alarm severity — SAFETY CRITICAL, never themed */
+  --sev-critical: #d03b3b;
+  --sev-warning: #fab219;
+  --sev-info: #3987e5;
 
   /* Power flow (domain-model §5) */
   --flow-import: var(--text); /* neutral: normal import */
-  --flow-export: #a982f5; /* export / reverse flow — distinct, not a "warning" */
+  --flow-export: #9085e9; /* export / reverse flow — distinct, not a warning */
 
-  /* On-color foregrounds (text placed on a status fill) */
-  --on-status: #0a0e17;
+  /* Delta cues */
+  --delta-up: #0ca30c;
+  --delta-down: #d03b3b;
 
-  /* Data-viz categorical series (PROVISIONAL — finalised in Step 3) */
-  --viz-1: #4c86ff;
-  --viz-2: #2fbf71;
-  --viz-3: #a982f5;
-  --viz-4: #f5a524;
-  --viz-5: #33c9c9;
-  --viz-6: #f06595;
+  /* Foreground placed on a saturated status/brand fill */
+  --on-solid: #ffffff;
+
+  /* Data-viz categorical series (validated, dark steps) */
+  --viz-1: #3987e5; /* blue */
+  --viz-2: #d95926; /* orange */
+  --viz-3: #199e70; /* aqua */
+  --viz-4: #c98500; /* yellow */
+  --viz-5: #d55181; /* magenta */
+  --viz-6: #008300; /* green */
+  --viz-7: #9085e9; /* violet */
+  --viz-8: #e66767; /* red */
 
   /* ======================================================================= */
   /* LAYER 2 — BRAND (per-tenant, overridable)                               */
   /* ======================================================================= */
 
-  /* Enersenx product default accent. A tenant may override --brand-accent. */
-  --brand-accent: #4c86ff;
-  --brand-accent-hover: #3f76e6;
+  --brand-accent: #4c8dff; /* Enersenx product default */
+  --brand-accent-hover: #6ba0ff;
   --brand-accent-fg: #ffffff;
+  /* soft brand wash for selected/hover chrome */
+  --brand-soft: #4c8dff1f;
 }
 
-/* Light theme (opt-in stub — fleshed out in Step 3) */
+/* Light theme (opt-in stub — expanded when a light control mode is needed) */
 :root[data-theme="light"] {
-  --app-bg: #f4f6fb;
+  --app-bg: #f5f7fb;
   --surface: #ffffff;
-  --surface-2: #f0f3fa;
-  --surface-3: #e6ebf5;
-  --border: #d7deec;
-  --border-strong: #c2ccdd;
+  --surface-2: #f1f4fa;
+  --surface-3: #e7ecf5;
+  --border: #dde3ee;
+  --border-strong: #c6d0e0;
 
-  --text: #131a26;
-  --text-muted: #4d5a72;
-  --text-faint: #7b899f;
+  --text: #121a27;
+  --text-muted: #4c5a72;
+  --text-faint: #7a889f;
   --text-inverse: #ffffff;
 
-  --on-status: #ffffff;
+  --flow-import: var(--text);
+  --on-solid: #ffffff;
+  --brand-soft: #4c8dff14;
 }

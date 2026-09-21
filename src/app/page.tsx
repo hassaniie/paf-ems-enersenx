@@ -1,85 +1,74 @@
-/*
- * Foundation status page — a deliberate placeholder for Step 2.
- * Not the product UI. It exists to prove the scaffold renders and the design
- * tokens resolve (surfaces, text hierarchy, status palette, tabular numerals).
- * The real surfaces arrive from Step 3 (design system) onward.
- */
+import { AppShell } from "@/components/layout/app-shell";
+import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { MetricTile } from "@/components/primitives/metric-tile";
+import { FeederRow } from "@/components/primitives/feeder-row";
+import { AlarmItem } from "@/components/primitives/alarm-item";
+import { ALARMS, FEEDERS, KPIS } from "@/data/mock/dashboard";
 
-const meterStatuses = [
-  { key: "online", label: "Online", cls: "bg-online" },
-  { key: "stale", label: "Stale", cls: "bg-stale" },
-  { key: "offline", label: "Offline", cls: "bg-offline" },
-  { key: "faulty", label: "Faulty", cls: "bg-faulty" },
-  { key: "awaiting-data", label: "Awaiting data", cls: "bg-awaiting" },
-] as const;
-
-const severities = [
-  { label: "Critical", cls: "bg-critical" },
-  { label: "Warning", cls: "bg-warning" },
-  { label: "Info", cls: "bg-info" },
-] as const;
-
-function Swatch({ label, cls }: { label: string; cls: string }) {
+export default function OverviewPage() {
   return (
-    <div className="flex items-center gap-2">
-      <span className={`inline-block h-3 w-3 rounded-full ${cls}`} />
-      <span className="text-sm text-muted">{label}</span>
-    </div>
-  );
-}
-
-export default function FoundationPage() {
-  return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
-      <p className="text-xs font-medium tracking-widest text-brand uppercase">
-        Enersenx EMS
-      </p>
-      <h1 className="mt-2 text-2xl font-semibold text-text">
-        Foundation scaffold
-      </h1>
-      <p className="mt-2 max-w-prose text-sm text-muted">
-        Next.js + TypeScript (strict) + Tailwind v4, wired to the two-layer
-        token system. This page is a scaffold check, not the product — it
-        confirms the design tokens resolve. Product surfaces are built from Step
-        3 onward.
-      </p>
-
-      <section className="mt-10 rounded-lg border border-border bg-surface p-6">
-        <h2 className="text-xs font-semibold tracking-wider text-faint uppercase">
-          Meter status tokens (constant across tenants)
-        </h2>
-        <div className="mt-4 flex flex-wrap gap-x-8 gap-y-3">
-          {meterStatuses.map((s) => (
-            <Swatch key={s.key} label={s.label} cls={s.cls} />
-          ))}
-        </div>
-
-        <h2 className="mt-8 text-xs font-semibold tracking-wider text-faint uppercase">
-          Alarm severity tokens
-        </h2>
-        <div className="mt-4 flex flex-wrap gap-x-8 gap-y-3">
-          {severities.map((s) => (
-            <Swatch key={s.label} label={s.label} cls={s.cls} />
-          ))}
-        </div>
-
-        <h2 className="mt-8 text-xs font-semibold tracking-wider text-faint uppercase">
-          Numeric readout (tabular)
-        </h2>
-        <div className="num mt-4 flex flex-wrap items-baseline gap-x-8 gap-y-2 text-text">
-          <span className="text-2xl font-semibold">544 kW</span>
-          <span className="text-2xl font-semibold text-export">
-            40 kW export
-          </span>
-          <span className="text-2xl font-semibold">0.956 PF</span>
-          <span className="code text-sm text-muted">ND-HT-01</span>
-        </div>
+    <AppShell title="Overview" subtitle="PAF Base, Lahore · live metering">
+      {/* KPI row */}
+      <section className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+        {KPIS.map((kpi) => (
+          <MetricTile key={kpi.label} {...kpi} />
+        ))}
       </section>
 
-      <p className="mt-8 text-xs text-faint">
-        See <span className="code">docs/</span> for the domain model and
-        telemetry contract this scaffold is built to serve.
+      {/* Main split */}
+      <section className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* Sites & feeders */}
+        <Card className="lg:col-span-2">
+          <CardHeader
+            title="Sites & Feeders"
+            subtitle="Live metering hierarchy"
+            action={
+              <span className="num text-xs text-muted">
+                553 kW · <span className="text-online">4</span>/10 online
+              </span>
+            }
+          />
+          <CardBody className="pt-2">
+            <div className="flex items-center gap-3 border-b border-border px-1 pb-2 text-[10px] font-semibold tracking-wider text-faint uppercase">
+              <span className="flex-1">Feeder</span>
+              <span className="w-28 text-right">Load</span>
+              <span className="hidden w-16 text-right sm:block">PF</span>
+              <span className="w-32 text-right">Status</span>
+            </div>
+            <div className="divide-y divide-border/60">
+              {FEEDERS.map((row) => (
+                <FeederRow key={row.code} row={row} />
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Active alarms */}
+        <Card>
+          <CardHeader
+            title="Active Alarms"
+            subtitle="2 active · 1 acknowledged"
+            action={
+              <a
+                href="#"
+                className="text-xs font-medium text-brand hover:text-brand-hover"
+              >
+                View all
+              </a>
+            }
+          />
+          <CardBody className="space-y-2.5">
+            {ALARMS.map((alarm, i) => (
+              <AlarmItem key={`${alarm.code}-${i}`} alarm={alarm} />
+            ))}
+          </CardBody>
+        </Card>
+      </section>
+
+      <p className="mt-4 text-[11px] text-faint">
+        Values are representative mock data implementing the telemetry contract —
+        the live simulator and backend swap in behind the same shapes.
       </p>
-    </main>
+    </AppShell>
   );
 }

@@ -31,10 +31,14 @@
 
   --color-import: var(--flow-import);
   --color-export: var(--flow-export);
+  --color-delta-up: var(--delta-up);
+  --color-delta-down: var(--delta-down);
+  --color-on-solid: var(--on-solid);
 
   --color-brand: var(--brand-accent);
   --color-brand-hover: var(--brand-accent-hover);
   --color-brand-fg: var(--brand-accent-fg);
+  --color-brand-soft: var(--brand-soft);
 
   --color-viz-1: var(--viz-1);
   --color-viz-2: var(--viz-2);
@@ -42,6 +46,8 @@
   --color-viz-4: var(--viz-4);
   --color-viz-5: var(--viz-5);
   --color-viz-6: var(--viz-6);
+  --color-viz-7: var(--viz-7);
+  --color-viz-8: var(--viz-8);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -80,4 +86,10 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
+}
+
+/* Thin custom scrollbars so dense panels stay clean. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
