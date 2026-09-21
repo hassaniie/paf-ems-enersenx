@@ -1,0 +1,107 @@
+/*
+ * Enersenx EMS — Design Tokens
+ * =============================
+ * TWO LAYERS, deliberately separated (see docs/domain-model.md §10):
+ *
+ *   1. SEMANTIC + STATUS layer  → constant across every tenant.
+ *      Safety-critical status colors live here and are NEVER themed.
+ *      A customer's brand must not be able to make an alarm look benign.
+ *
+ *   2. BRAND layer              → per-tenant, overridable.
+ *      Only chrome/accent (nav highlight, links, primary actions, logo).
+ *      Override per tenant by setting --brand-* on a wrapper element, e.g.
+ *      <div data-tenant="paf" style="--brand-accent:#c8a24a">…</div>
+ *
+ * Dark-first: this is a control surface. Dark is the default (:root).
+ * A light theme is opt-in via :root[data-theme="light"] (stub below).
+ *
+ * NOTE: exact color values are PROVISIONAL. The status/data-viz palette is
+ * finalised in Step 3 using the dataviz color method (contrast + colorblind
+ * validation). Structure is final; hex values may still move.
+ */
+
+:root {
+  /* ---- Scale primitives -------------------------------------------------- */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas,
+    monospace;
+
+  /* ======================================================================= */
+  /* LAYER 1 — SEMANTIC + STATUS (constant, never themed)                    */
+  /* ======================================================================= */
+
+  /* Surfaces (dark-first) */
+  --app-bg: #0a0e17;
+  --surface: #111725;
+  --surface-2: #172032;
+  --surface-3: #1e293e;
+  --border: #26324a;
+  --border-strong: #35456380;
+
+  /* Text */
+  --text: #e8edf6;
+  --text-muted: #9aa8c0;
+  --text-faint: #64718a;
+  --text-inverse: #0a0e17;
+
+  /* Meter status (domain-model §7) — SAFETY CRITICAL, do not theme */
+  --status-online: #2fbf71; /* reporting normally */
+  --status-stale: #eab308; /* one interval missed */
+  --status-offline: #8493ad; /* comms lost (was connected) */
+  --status-faulty: #f0453f; /* readings implausible — inspect */
+  --status-awaiting: #4c86ff; /* configured, never reported yet */
+
+  /* Alarm severity — SAFETY CRITICAL, do not theme */
+  --sev-critical: #f0453f;
+  --sev-warning: #eab308;
+  --sev-info: #3ba7f0;
+
+  /* Power flow (domain-model §5) */
+  --flow-import: var(--text); /* neutral: normal import */
+  --flow-export: #a982f5; /* export / reverse flow — distinct, not a "warning" */
+
+  /* On-color foregrounds (text placed on a status fill) */
+  --on-status: #0a0e17;
+
+  /* Data-viz categorical series (PROVISIONAL — finalised in Step 3) */
+  --viz-1: #4c86ff;
+  --viz-2: #2fbf71;
+  --viz-3: #a982f5;
+  --viz-4: #f5a524;
+  --viz-5: #33c9c9;
+  --viz-6: #f06595;
+
+  /* ======================================================================= */
+  /* LAYER 2 — BRAND (per-tenant, overridable)                               */
+  /* ======================================================================= */
+
+  /* Enersenx product default accent. A tenant may override --brand-accent. */
+  --brand-accent: #4c86ff;
+  --brand-accent-hover: #3f76e6;
+  --brand-accent-fg: #ffffff;
+}
+
+/* Light theme (opt-in stub — fleshed out in Step 3) */
+:root[data-theme="light"] {
+  --app-bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #f0f3fa;
+  --surface-3: #e6ebf5;
+  --border: #d7deec;
+  --border-strong: #c2ccdd;
+
+  --text: #131a26;
+  --text-muted: #4d5a72;
+  --text-faint: #7b899f;
+  --text-inverse: #ffffff;
+
+  --on-status: #ffffff;
+}

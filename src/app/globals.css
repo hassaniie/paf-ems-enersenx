@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/*
+ * Map design tokens → Tailwind theme so utilities like `bg-surface`,
+ * `text-muted`, `text-faulty`, `border-border` resolve to our tokens.
+ * (Tailwind v4 CSS-first config.)
+ */
+@theme inline {
+  --color-app-bg: var(--app-bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-inverse: var(--text-inverse);
+
+  --color-online: var(--status-online);
+  --color-stale: var(--status-stale);
+  --color-offline: var(--status-offline);
+  --color-faulty: var(--status-faulty);
+  --color-awaiting: var(--status-awaiting);
+
+  --color-critical: var(--sev-critical);
+  --color-warning: var(--sev-warning);
+  --color-info: var(--sev-info);
+
+  --color-import: var(--flow-import);
+  --color-export: var(--flow-export);
+
+  --color-brand: var(--brand-accent);
+  --color-brand-hover: var(--brand-accent-hover);
+  --color-brand-fg: var(--brand-accent-fg);
+
+  --color-viz-1: var(--viz-1);
+  --color-viz-2: var(--viz-2);
+  --color-viz-3: var(--viz-3);
+  --color-viz-4: var(--viz-4);
+  --color-viz-5: var(--viz-5);
+  --color-viz-6: var(--viz-6);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+html {
+  height: 100%;
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100%;
+  background: var(--app-bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * Numeric readouts (meter values, kW/kWh/PF) use tabular figures so digits
+ * don't jitter as live values update. Apply `.num` to any numeric readout.
+ */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Meter/asset codes (ND-HT-01) read as identifiers, not prose. */
+.code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
