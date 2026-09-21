@@ -4,6 +4,21 @@ Enersenx is a **multi-tenant energy monitoring system (EMS)**. PAF is one tenant
 This repo is a deliberate rebuild of an earlier AI-generated prototype; the goal is a
 strong foundation, a real design system, and good UX — not a restyle.
 
+## ▶ Current focus — READ THIS FIRST (handoff)
+
+We are migrating the UI to the **real ReUI component library**. An earlier session had
+to *hand-reproduce* ReUI/Atlas components because `reui.io` was blocked by the sandbox
+network policy. This environment now has **Full network access**, so `reui.io` should be
+reachable and the real components can be installed.
+
+**Your first job: follow [`docs/reui-migration.md`](./docs/reui-migration.md)** — it has
+the verification steps, the exact `shadcn add @reui/…` manifest, and the map from our
+hand-built components to their ReUI replacements. `components.json` is already wired for
+the `@reui` registry.
+
+Before large changes, run `npm run check`. Push to the working branch (do not open a PR
+unless asked).
+
 ## Read first
 
 `docs/` is the source of truth. Read it before changing behavior:
@@ -36,7 +51,8 @@ Rules of the rebuild:
 1. **The UI never re-decides domain semantics.** Sign convention, unit scaling, and
    state derivation happen in `src/domain` / `src/config`, once. Screens consume results.
 2. **Tokens, not hex.** Colors come from `src/styles/tokens.css` via Tailwind utilities
-   (`bg-surface`, `text-muted`, `text-faulty`, …). No inline hex in components.
+   (`bg-card`, `bg-background`, `text-muted-foreground`, `text-faulty`, `border-border`,
+   …) — shadcn/ReUI-compatible neutral tokens. No inline hex in components.
 3. **Status colors are safety-critical and never themed.** Per-tenant branding may set
    `--brand-*` only. See tokens.css.
 4. **One authoritative representation per fact per screen.** The prototype showed the same
