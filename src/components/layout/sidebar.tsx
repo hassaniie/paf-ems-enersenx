@@ -5,6 +5,7 @@ import {
   ChevronRight,
   FileText,
   Gauge,
+  Grid2X2,
   LayoutDashboard,
   LifeBuoy,
   Network,
@@ -83,15 +84,15 @@ function NavList({ title, items }: { title: string; items: NavItem[] }) {
 
 export function Sidebar() {
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-background">
+    <aside className="sidebar-surface hidden w-[272px] shrink-0 flex-col border-r border-border md:flex">
       {/* brand / workspace */}
-      <div className="flex items-center gap-2.5 px-4 py-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-          <span className="text-sm font-bold">E</span>
+      <div className="flex h-[72px] items-center gap-3 border-b border-border px-4">
+        <span className="brand-mark grid size-9 shrink-0 place-items-center rounded-lg bg-brand text-brand-foreground">
+          <Activity className="size-[18px]" />
         </span>
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-semibold text-foreground">
-            Enersenx
+            Enersen<span className="text-brand">X</span>
           </p>
           <p className="truncate text-[11px] text-muted-foreground">
             PAF Base, Lahore
@@ -99,7 +100,23 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-2 py-2">
+      <div className="mx-3 mt-4 rounded-xl border border-border bg-elevated/55 p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <Grid2X2 className="size-3.5 text-brand" />
+            PAF Base Lahore
+          </div>
+          <ChevronRight className="size-3.5 text-muted-foreground" />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+          <span>10 metering points</span>
+          <span className="inline-flex items-center gap-1">
+            <i className="size-1.5 rounded-full bg-online" />4 online
+          </span>
+        </div>
+      </div>
+
+      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-2 py-5">
         <NavList title="Monitoring" items={MONITORING} />
         <NavList title="Command & Admin" items={ADMIN} />
 
@@ -148,8 +165,8 @@ export function Sidebar() {
             </a>
           </li>
         </ul>
-        <div className="mt-1 flex items-center gap-2.5 rounded-lg px-3 py-2">
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold text-foreground">
+        <div className="mt-2 flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2.5">
+          <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand/15 text-xs font-semibold text-brand">
             AN
           </span>
           <div className="min-w-0 leading-tight">

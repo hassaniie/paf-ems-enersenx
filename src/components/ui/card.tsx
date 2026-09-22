@@ -12,7 +12,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-card text-card-foreground",
+        "surface-card rounded-xl border border-border bg-card text-card-foreground",
         className,
       )}
     >
@@ -35,12 +35,12 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        "flex items-start justify-between gap-4 px-5 pt-5 pb-4",
+        "flex items-start justify-between gap-4 px-5 pt-5 pb-4 lg:px-6 lg:pt-6",
         className,
       )}
     >
       <div className="min-w-0">
-        <h2 className="text-[15px] leading-none font-semibold text-foreground">
+        <h2 className="text-sm leading-none font-semibold tracking-[-0.01em] text-foreground">
           {title}
         </h2>
         {subtitle ? (
@@ -59,5 +59,7 @@ export function CardBody({
   className?: string;
   children: ReactNode;
 }) {
-  return <div className={cn("px-5 pb-5", className)}>{children}</div>;
+  return (
+    <div className={cn("px-5 pb-5 lg:px-6 lg:pb-6", className)}>{children}</div>
+  );
 }

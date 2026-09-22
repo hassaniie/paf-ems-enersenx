@@ -23,7 +23,7 @@ const SERIES = [
 
 export function LoadArea({ data }: { data: LoadPoint[] }) {
   return (
-    <div className="h-[260px] w-full">
+    <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
@@ -47,7 +47,7 @@ export function LoadArea({ data }: { data: LoadPoint[] }) {
           <CartesianGrid
             vertical={false}
             stroke="var(--border)"
-            strokeDasharray="3 3"
+            strokeDasharray="2 5"
           />
           <XAxis
             dataKey="t"
@@ -74,7 +74,7 @@ export function LoadArea({ data }: { data: LoadPoint[] }) {
               type="monotone"
               dataKey={s.key}
               stroke={s.color}
-              strokeWidth={2}
+              strokeWidth={2.25}
               fill={`url(#grad-${s.key})`}
               dot={false}
               activeDot={{ r: 3, strokeWidth: 0 }}

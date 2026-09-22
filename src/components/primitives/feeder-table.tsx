@@ -33,7 +33,7 @@ export function FeederTable({ rows }: { rows: FeederRow[] }) {
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-border text-left">
+          <tr className="border-b border-border bg-elevated/45 text-left">
             <Th className="pl-5">Feeder</Th>
             <Th className="w-[220px]">Load</Th>
             <Th className="hidden w-24 sm:table-cell">Power factor</Th>
@@ -57,7 +57,7 @@ export function FeederTable({ rows }: { rows: FeederRow[] }) {
               <tr
                 key={row.code}
                 className={cn(
-                  "border-b border-border/70 transition-colors last:border-0 hover:bg-accent/40",
+                  "border-b border-border/70 transition-colors last:border-0 hover:bg-accent/60",
                   row.derived && "bg-elevated/40",
                 )}
               >

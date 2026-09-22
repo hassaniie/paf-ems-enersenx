@@ -12,11 +12,13 @@ export function AppShell({
   children: ReactNode;
 }) {
   return (
-    <div className="flex h-dvh overflow-hidden bg-background">
+    <div className="app-canvas flex h-dvh overflow-hidden bg-background">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar title={title} subtitle={subtitle} />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+          {children}
+        </main>
       </div>
     </div>
   );

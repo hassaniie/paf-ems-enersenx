@@ -81,6 +81,182 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.app-canvas {
+  background-image: radial-gradient(
+    circle at 78% -10%,
+    color-mix(in oklab, var(--brand) 9%, transparent),
+    transparent 33%
+  );
+}
+
+.sidebar-surface {
+  background: color-mix(in oklab, var(--background) 92%, var(--card));
+}
+.topbar {
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  backdrop-filter: blur(16px);
+}
+.surface-card {
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.025),
+    0 16px 42px rgb(0 0 0 / 0.09);
+}
+.metric-card {
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -65% 25%;
+  height: 85%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in oklab, var(--brand) 8%, transparent),
+    transparent 68%
+  );
+  pointer-events: none;
+}
+.brand-mark {
+  box-shadow: 0 8px 24px color-mix(in oklab, var(--brand) 25%, transparent);
+}
+
+.overview-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.25rem 0 0.5rem;
+}
+.hero-summary {
+  grid-template-columns: repeat(3, auto);
+  align-items: center;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--border);
+}
+.hero-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 130px;
+  background: var(--card);
+  padding: 0.75rem 0.9rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+.hero-summary svg {
+  width: 15px;
+  color: var(--brand);
+}
+.hero-summary b {
+  color: var(--foreground);
+  font-size: 0.875rem;
+}
+
+.command-bar {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  padding: 0.45rem 0.55rem 0.45rem 0.8rem;
+}
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 0.55rem;
+  background: var(--elevated);
+}
+.segment {
+  min-width: 42px;
+  height: 28px;
+  border-radius: 0.4rem;
+  padding: 0 0.6rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+.segment:hover {
+  color: var(--foreground);
+}
+.segment-active {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
+}
+
+.search-trigger {
+  width: 220px;
+  height: 34px;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--card);
+  padding: 0 0.65rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+.search-trigger span {
+  flex: 1;
+  text-align: left;
+}
+.search-trigger kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  background: var(--elevated);
+  padding: 2px 5px;
+  font: inherit;
+  font-size: 0.65rem;
+}
+.icon-tile {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--elevated);
+  color: var(--muted-foreground);
+}
+.icon-tile-brand {
+  color: var(--brand);
+  background: color-mix(in oklab, var(--brand) 10%, var(--elevated));
+  border-color: color-mix(in oklab, var(--brand) 20%, var(--border));
+}
+.icon-tile-warning {
+  color: var(--sev-warning);
+  background: color-mix(in oklab, var(--sev-warning) 9%, var(--elevated));
+}
+.icon-tile-critical {
+  color: var(--sev-critical);
+}
+.alarm-row {
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+.alarm-row:hover {
+  border-color: color-mix(in oklab, var(--border) 55%, var(--muted-foreground));
+  background: var(--elevated);
+}
+
+button {
+  font-family: inherit;
+}
+
 /* Tabular figures for numeric readouts that update or align in columns. */
 .num {
   font-variant-numeric: tabular-nums;

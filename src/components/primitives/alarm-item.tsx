@@ -13,7 +13,7 @@ export interface AlarmItemData {
 export function AlarmItem({ alarm }: { alarm: AlarmItemData }) {
   const color = `var(--sev-${alarm.severity})`;
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-border bg-elevated/40 p-3">
+    <div className="alarm-row flex items-start gap-3 rounded-xl border border-border bg-elevated/35 p-3.5">
       <span
         className="mt-1.5 size-2 shrink-0 rounded-full"
         style={{ backgroundColor: color }}

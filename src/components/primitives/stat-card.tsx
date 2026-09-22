@@ -3,6 +3,7 @@ import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { MiniArea } from "@/components/primitives/mini-area";
 import { cn } from "@/lib/cn";
+import { IconTile } from "@/components/ui/icon-tile";
 
 export interface StatDelta {
   text: string;
@@ -35,12 +36,10 @@ export function StatCard({
   valueClassName,
 }: StatCardProps) {
   return (
-    <Card className="flex flex-col p-5">
+    <Card className="metric-card flex min-h-[186px] flex-col p-5">
       <div className="flex items-start justify-between">
         {Icon ? (
-          <span className="grid size-9 place-items-center rounded-lg border border-border bg-elevated text-muted-foreground">
-            <Icon className="size-4.5" />
-          </span>
+          <IconTile icon={Icon} tone={statusColor ? "warning" : "brand"} />
         ) : (
           <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
             {label}
@@ -68,7 +67,7 @@ export function StatCard({
       >
         <span
           className={cn(
-            "text-[28px] leading-none font-semibold tracking-tight text-foreground",
+            "text-[30px] leading-none font-semibold tracking-[-0.04em] text-foreground",
             valueClassName,
           )}
         >
