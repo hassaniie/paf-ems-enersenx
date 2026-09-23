@@ -1,4 +1,7 @@
+"use client";
+
 import type { LucideIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 import {
   Activity,
   Bell,
@@ -13,30 +16,32 @@ import {
   Settings,
   Target,
   Users,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 interface NavItem {
   label: string;
   icon: LucideIcon;
-  active?: boolean;
+  href: string;
   badge?: number;
   chevron?: boolean;
 }
 
 const MONITORING: NavItem[] = [
-  { label: "Overview", icon: LayoutDashboard, active: true },
-  { label: "Sites & Meters", icon: Network, chevron: true },
-  { label: "Analytics", icon: Activity },
-  { label: "Alarms", icon: Bell, badge: 2 },
-  { label: "Power Quality", icon: Gauge },
+  { label: "Overview", icon: LayoutDashboard, href: "/" },
+  { label: "Live Power Flow", icon: Zap, href: "/power-flow" },
+  { label: "Sites & Meters", icon: Network, href: "#", chevron: true },
+  { label: "Analytics", icon: Activity, href: "#" },
+  { label: "Alarms", icon: Bell, href: "#", badge: 2 },
+  { label: "Power Quality", icon: Gauge, href: "#" },
 ];
 
 const ADMIN: NavItem[] = [
-  { label: "Command Report", icon: FileText },
-  { label: "Energy Quotas", icon: Target },
-  { label: "Users", icon: Users, chevron: true },
-  { label: "Audit Log", icon: ScrollText },
+  { label: "Command Report", icon: FileText, href: "#" },
+  { label: "Energy Quotas", icon: Target, href: "#" },
+  { label: "Users", icon: Users, href: "#", chevron: true },
+  { label: "Audit Log", icon: ScrollText, href: "#" },
 ];
 
 const WATCHLIST = [
@@ -46,6 +51,7 @@ const WATCHLIST = [
 ];
 
 function NavList({ title, items }: { title: string; items: NavItem[] }) {
+  const pathname = usePathname();
   return (
     <div>
       <p className="px-3 pb-1.5 text-[11px] font-medium tracking-wide text-muted-foreground">
@@ -55,11 +61,11 @@ function NavList({ title, items }: { title: string; items: NavItem[] }) {
         {items.map((item) => (
           <li key={item.label}>
             <a
-              href="#"
-              aria-current={item.active ? "page" : undefined}
+              href={item.href}
+              aria-current={pathname === item.href ? "page" : undefined}
               className={cn(
                 "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
-                item.active
+                pathname === item.href
                   ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground",
               )}
