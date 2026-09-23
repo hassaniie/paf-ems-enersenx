@@ -25,6 +25,7 @@ interface AlarmContextValue {
   transition: (alarmId: string, lifecycle: AlarmLifecycle) => void;
   assign: (alarmId: string, actor?: AlarmActor) => void;
   addNote: (alarmId: string, note: string) => void;
+  raise: (seed: AlarmSeed) => void;
 }
 
 const AlarmContext = createContext<AlarmContextValue | null>(null);
@@ -156,6 +157,8 @@ export function AlarmProvider({ children }: { children: ReactNode }) {
         setStore((current) =>
           addAlarmNote(current, alarmId, note, "A. Q. Niazi"),
         ),
+      raise: (seed) =>
+        setStore((current) => reconcileAlarmSeeds(current, [seed])),
     }),
     [ready, store],
   );

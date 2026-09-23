@@ -112,8 +112,9 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       {
         label: "Energy Quotas",
         icon: Target,
-        href: "#quotas",
+        href: "/quotas",
         roles: ["Admin", "Commander"],
+        state: "ready",
       },
     ],
   },
