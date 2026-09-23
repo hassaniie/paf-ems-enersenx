@@ -1351,6 +1351,183 @@ button {
   }
 }
 
+/* Design-system consolidation layer
+ * Page CSS controls composition only. Shared tokens own type, radii and controls.
+ */
+.surface-card,
+.metric-ribbon,
+.topology-workspace,
+.topology-footrail,
+.shell-menu,
+.command-palette,
+.decision-rail {
+  border-radius: var(--radius-card);
+}
+
+.command-bar,
+.workspace-switcher,
+.sidebar-role-note,
+.topology-node,
+.inspector-live-reading,
+.inspector-metrics,
+.inspector-alert,
+.contribution-summary,
+.command-tooltip {
+  border-radius: var(--radius-panel);
+}
+
+.segment,
+.search-trigger,
+.global-search,
+.topbar-icon-button,
+.profile-trigger > span,
+.sidebar-link,
+.topology-modes,
+.topology-modes button,
+.topology-tools button,
+.topology-search,
+.inspector-actions button,
+.profile-links a,
+.profile-links button,
+.role-switcher button,
+.palette-content a,
+.palette-content button {
+  border-radius: var(--radius-control);
+}
+
+.command-bar,
+.topology-toolbar {
+  min-height: 3.5rem;
+}
+
+.segment,
+.topology-modes button,
+.topology-tools button,
+.global-search,
+.topbar-icon-button,
+.inspector-actions button,
+.profile-links a,
+.profile-links button {
+  min-height: var(--control-sm);
+}
+
+.search-trigger,
+.profile-trigger,
+.palette-content a,
+.palette-content button,
+.role-switcher button {
+  min-height: var(--control-md);
+}
+
+/* Absolute readability floor for meaningful active interface copy. */
+.workspace-copy small,
+.sidebar-group > p,
+.sidebar-badge,
+.sidebar-role-note small,
+.global-search kbd,
+.topbar-icon-button b,
+.profile-trigger small,
+.shell-menu header small,
+.alert-menu-item p,
+.alert-menu-item time,
+.profile-summary small,
+.role-switcher > p,
+.role-switcher small,
+.palette-input kbd,
+.command-palette footer kbd,
+.palette-content > p,
+.palette-content small,
+.command-palette footer,
+.topology-search kbd,
+.stage-coordinate,
+.topology-node-state,
+.topology-node-meta,
+.topology-legend span,
+.topology-zoom button,
+.topology-zoom span,
+.inspector-eyebrow,
+.inspector-identity code,
+.inspector-live-reading > span,
+.inspector-metrics span,
+.inspector-mini-trend > div,
+.inspector-alert span,
+.inspector-help,
+.topology-footrail small,
+.topology-footrail p {
+  font-size: var(--text-2xs);
+}
+
+.sidebar-link,
+.topbar-context,
+.topbar-title p,
+.global-search,
+.live-status,
+.profile-trigger strong,
+.menu-footer-action,
+.profile-links a,
+.profile-links button,
+.topology-modes button,
+.topology-tools button,
+.inspector-actions button {
+  font-size: var(--text-xs);
+}
+
+.shell-menu {
+  background: var(--card);
+  box-shadow: var(--shadow-popover, 0 20px 55px rgb(0 0 0 / 0.32));
+}
+
+.profile-menu {
+  padding: var(--space-3);
+}
+
+.profile-summary {
+  padding: var(--space-2);
+}
+
+.profile-summary strong,
+.role-switcher strong,
+.alert-menu-item strong {
+  font-size: var(--text-xs);
+}
+
+.app-canvas :where(button, a, input):focus-visible {
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 2px;
+}
+
+.role-switcher {
+  margin-top: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+.role-switcher button {
+  padding: var(--space-2);
+}
+
+.profile-links {
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+}
+
+.topology-node-name,
+.topology-footrail strong,
+.inspector-metrics strong {
+  font-size: var(--text-xs);
+}
+
+.topology-node {
+  padding: var(--space-3);
+}
+
+.topology-inspector {
+  padding: var(--space-4);
+}
+
+.topology-summary {
+  display: none;
+}
+
 /* Application shell */
 .app-sidebar {
   position: relative;
@@ -3196,4 +3373,113 @@ button {
   .topology-footrail p {
     display: none;
   }
+}
+
+/* Final component contract: this layer intentionally wins over page composition. */
+.surface-card,
+.metric-ribbon,
+.topology-workspace,
+.topology-footrail,
+.shell-menu,
+.command-palette,
+.decision-rail {
+  border-radius: var(--radius-card);
+}
+.command-bar,
+.workspace-switcher,
+.sidebar-role-note,
+.topology-node,
+.inspector-live-reading,
+.inspector-metrics,
+.inspector-alert,
+.contribution-summary,
+.command-tooltip {
+  border-radius: var(--radius-panel);
+}
+.segment,
+.search-trigger,
+.global-search,
+.topbar-icon-button,
+.profile-trigger > span,
+.sidebar-link,
+.topology-modes,
+.topology-modes button,
+.topology-tools button,
+.topology-search,
+.inspector-actions button,
+.profile-links a,
+.profile-links button,
+.role-switcher button,
+.palette-content a,
+.palette-content button {
+  border-radius: var(--radius-control);
+}
+.workspace-copy small,
+.sidebar-group > p,
+.sidebar-badge,
+.sidebar-role-note small,
+.global-search kbd,
+.topbar-icon-button b,
+.profile-trigger small,
+.shell-menu header small,
+.alert-menu-item p,
+.alert-menu-item time,
+.profile-summary small,
+.role-switcher > p,
+.role-switcher small,
+.palette-input kbd,
+.command-palette footer kbd,
+.palette-content > p,
+.palette-content small,
+.command-palette footer,
+.topology-search kbd,
+.stage-coordinate,
+.topology-node-state,
+.topology-node-meta,
+.topology-legend span,
+.topology-zoom button,
+.topology-zoom span,
+.inspector-eyebrow,
+.inspector-identity code,
+.inspector-live-reading > span,
+.inspector-metrics span,
+.inspector-mini-trend > div,
+.inspector-alert span,
+.inspector-help,
+.topology-footrail small,
+.topology-footrail p {
+  font-size: var(--text-2xs);
+}
+.sidebar-link,
+.topbar-context,
+.topbar-title p,
+.global-search,
+.live-status,
+.profile-trigger strong,
+.menu-footer-action,
+.profile-links a,
+.profile-links button,
+.topology-modes button,
+.topology-tools button,
+.inspector-actions button,
+.topology-node-name,
+.topology-footrail strong,
+.inspector-metrics strong {
+  font-size: var(--text-xs);
+}
+.shell-menu {
+  border-color: var(--border);
+  background: var(--card);
+}
+.profile-menu {
+  padding: var(--space-3);
+}
+.profile-summary,
+.role-switcher button {
+  padding: var(--space-2);
+}
+.profile-summary strong,
+.role-switcher strong,
+.alert-menu-item strong {
+  font-size: var(--text-xs);
 }

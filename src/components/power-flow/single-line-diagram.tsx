@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
-  ArrowDownToLine,
   ArrowUpRight,
   Building2,
   CheckCircle2,
@@ -28,6 +27,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { MetricRibbon } from "@/components/primitives/metric-ribbon";
 
 type NodeStatus = "online" | "awaiting" | "faulty" | "exporting";
 type ViewMode = "live" | "fault" | "load" | "quality";
@@ -223,6 +223,44 @@ const modes: { id: ViewMode; label: string; icon: typeof Radio }[] = [
   { id: "quality", label: "Power quality", icon: Waves },
 ];
 
+const flowMetrics = [
+  {
+    label: "Net demand",
+    value: "553",
+    unit: "kW",
+    note: "55% of capacity",
+    tone: "neutral",
+  },
+  {
+    label: "Grid condition",
+    value: "Importing",
+    unit: "",
+    note: "Normal utility supply",
+    tone: "good",
+  },
+  {
+    label: "Solar contribution",
+    value: "18",
+    unit: "kW",
+    note: "160 kWh today",
+    tone: "export",
+  },
+  {
+    label: "Meters reporting",
+    value: "4/10",
+    unit: "",
+    note: "6 awaiting data",
+    tone: "info",
+  },
+  {
+    label: "Active exceptions",
+    value: "2",
+    unit: "",
+    note: "1 commercial risk",
+    tone: "warning",
+  },
+] as const;
+
 export function SingleLineDiagram() {
   const [selected, setSelected] = useState<EnergyNode>(nodes[1]!);
   const [mode, setMode] = useState<ViewMode>("live");
@@ -258,39 +296,7 @@ export function SingleLineDiagram() {
         </div>
       </section>
 
-      <section className="topology-summary" aria-label="Live energy summary">
-        <div>
-          <span>Net demand</span>
-          <strong className="num">
-            553 <small>kW</small>
-          </strong>
-          <em>55% of capacity</em>
-        </div>
-        <div>
-          <span>Grid condition</span>
-          <strong>Importing</strong>
-          <em className="positive">
-            <ArrowDownToLine /> Normal
-          </em>
-        </div>
-        <div>
-          <span>Solar contribution</span>
-          <strong className="num export-reading">
-            18 <small>kW</small>
-          </strong>
-          <em>160 kWh today</em>
-        </div>
-        <div>
-          <span>Reporting</span>
-          <strong className="num">4 / 10</strong>
-          <em>6 awaiting data</em>
-        </div>
-        <div>
-          <span>Active exceptions</span>
-          <strong className="num exception-reading">2</strong>
-          <em>1 commercial risk</em>
-        </div>
-      </section>
+      <MetricRibbon items={flowMetrics} label="Live energy summary" />
 
       <section className="topology-workspace">
         <header className="topology-toolbar">

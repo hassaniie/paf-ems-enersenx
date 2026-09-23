@@ -15,6 +15,7 @@ import { CommandLoadChart } from "@/components/charts/command-load-chart";
 import { DashboardToolbar } from "@/components/dashboard-toolbar";
 import { AppShell } from "@/components/layout/app-shell";
 import { FeederTable } from "@/components/primitives/feeder-table";
+import { MetricRibbon } from "@/components/primitives/metric-ribbon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -106,18 +107,7 @@ export default function OverviewPage() {
 
         <DashboardToolbar />
 
-        <section className="metric-ribbon" aria-label="Operational summary">
-          {metrics.map((metric) => (
-            <article className="metric-ribbon-item" key={metric.label}>
-              <span className="metric-label">{metric.label}</span>
-              <div>
-                <strong className="num">{metric.value}</strong>
-                {metric.unit ? <span>{metric.unit}</span> : null}
-              </div>
-              <small data-tone={metric.tone}>{metric.note}</small>
-            </article>
-          ))}
-        </section>
+        <MetricRibbon items={metrics} />
 
         <section className="command-main-grid">
           <Card className="command-primary-card">
