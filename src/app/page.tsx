@@ -1,176 +1,345 @@
-import { AppShell } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
-import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { StatCard } from "@/components/primitives/stat-card";
-import { ProgressList } from "@/components/primitives/progress-list";
-import { FeederTable } from "@/components/primitives/feeder-table";
-import { AlarmItem } from "@/components/primitives/alarm-item";
-import { LoadArea } from "@/components/charts/load-area";
-import { DashboardToolbar } from "@/components/dashboard-toolbar";
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import type { CSSProperties } from "react";
 import {
-  ArrowUpRight,
-  Building2,
+  ArrowRight,
+  CheckCircle2,
+  CircleAlert,
   CircleGauge,
   Radio,
   ShieldCheck,
+  Sparkles,
+  SunMedium,
+  Zap,
 } from "lucide-react";
-import {
-  ALARMS,
-  FEEDERS,
-  FEEDER_LOAD,
-  KPIS,
-  LOAD_SERIES,
-} from "@/data/mock/dashboard";
+import { CommandLoadChart } from "@/components/charts/command-load-chart";
+import { DashboardToolbar } from "@/components/dashboard-toolbar";
+import { AppShell } from "@/components/layout/app-shell";
+import { FeederTable } from "@/components/primitives/feeder-table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { ALARMS, FEEDERS, FEEDER_LOAD } from "@/data/mock/dashboard";
 
-function LegendDot({ color, label }: { color: string; label: string }) {
+const metrics = [
+  {
+    label: "Active load",
+    value: "553",
+    unit: "kW",
+    note: "+4.1% vs yesterday",
+    tone: "neutral",
+  },
+  {
+    label: "Energy today",
+    value: "8.74",
+    unit: "MWh",
+    note: "−2.3% vs baseline",
+    tone: "good",
+  },
+  {
+    label: "Solar export",
+    value: "160",
+    unit: "kWh",
+    note: "18 kW live",
+    tone: "export",
+  },
+  {
+    label: "Average PF",
+    value: "0.930",
+    unit: "",
+    note: "2 feeders below target",
+    tone: "warning",
+  },
+  {
+    label: "Meters reporting",
+    value: "4/10",
+    unit: "",
+    note: "6 awaiting data",
+    tone: "info",
+  },
+] as const;
+
+function SectionLink({ href, label }: { href: string; label: string }) {
   return (
-    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <span
-        className="size-2 rounded-full"
-        style={{ backgroundColor: color }}
-      />
-      {label}
-    </span>
+    <Button asChild variant="ghost" size="sm" className="section-link">
+      <Link href={href}>
+        {label}
+        <ArrowRight />
+      </Link>
+    </Button>
   );
 }
 
 export default function OverviewPage() {
   return (
-    <AppShell title="Overview" subtitle="PAF Base, Lahore · live metering">
-      <div className="mx-auto max-w-[1600px] space-y-5">
-        <section className="overview-hero">
+    <AppShell
+      title="Command Center"
+      subtitle="PAF Base, Lahore · Energy operations"
+    >
+      <div className="command-center mx-auto max-w-[1680px] space-y-4">
+        <section className="command-intro">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Badge tone="var(--status-online)">
                 <Radio className="size-3" />
-                Telemetry healthy
+                Live operations
               </Badge>
               <span className="text-xs text-muted-foreground">
-                Last packet 8s ago
+                Refreshed 8 seconds ago
               </span>
             </div>
-            <h2 className="text-balance text-2xl font-semibold tracking-[-0.035em] text-foreground sm:text-[30px]">
-              Energy command overview
-            </h2>
-            <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
-              Live operational picture across PAF Base Lahore, with load,
-              generation, power quality and risk in one decision layer.
+            <h1>Energy operations, at a glance.</h1>
+            <p>
+              What needs attention now, how demand is moving, and where every
+              kilowatt is going across PAF Base Lahore.
             </p>
           </div>
-          <div className="hero-summary hidden xl:grid">
-            <div>
-              <Building2 />
-              <span>
-                <b>10</b> assets
-              </span>
-            </div>
-            <div>
-              <CircleGauge />
-              <span>
-                <b>55%</b> capacity
-              </span>
-            </div>
-            <div>
+          <div className="command-health">
+            <span className="command-health-icon">
               <ShieldCheck />
-              <span>
-                <b>2</b> need action
-              </span>
+            </span>
+            <div>
+              <small>System condition</small>
+              <strong>Stable, with 2 exceptions</strong>
             </div>
           </div>
         </section>
 
         <DashboardToolbar />
 
-        {/* KPI row */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {KPIS.map((kpi) => (
-            <StatCard key={kpi.label} {...kpi} />
+        <section className="metric-ribbon" aria-label="Operational summary">
+          {metrics.map((metric) => (
+            <article className="metric-ribbon-item" key={metric.label}>
+              <span className="metric-label">{metric.label}</span>
+              <div>
+                <strong className="num">{metric.value}</strong>
+                {metric.unit ? <span>{metric.unit}</span> : null}
+              </div>
+              <small data-tone={metric.tone}>{metric.note}</small>
+            </article>
           ))}
         </section>
 
-        {/* chart + load share */}
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,.75fr)]">
-          <Card>
+        <section className="command-main-grid">
+          <Card className="command-primary-card">
             <CardHeader
-              title="Site load — today"
-              subtitle="Import vs solar export · peak demand 777 kW (78% of sanctioned)"
-              action={
-                <div className="hidden items-center gap-4 sm:flex">
-                  <LegendDot color="var(--viz-1)" label="Site load" />
-                  <LegendDot color="var(--flow-export)" label="Solar export" />
-                </div>
-              }
+              title="Demand & energy balance"
+              subtitle="Net demand, on-site solar and sanctioned capacity · today"
+              action={<SectionLink href="/analytics" label="Open analytics" />}
             />
             <CardBody>
-              <LoadArea data={LOAD_SERIES} />
-            </CardBody>
-          </Card>
-
-          <Card className="overflow-hidden">
-            <CardHeader
-              title="Load by feeder"
-              subtitle="Share of active load"
-            />
-            <CardBody>
-              <ProgressList items={FEEDER_LOAD} />
-              <div className="mt-5 rounded-lg border border-border bg-elevated/50 p-3.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Sanctioned demand
-                  </span>
-                  <span className="num text-sm font-semibold">1,000 kW</span>
+              <div className="demand-summary">
+                <div className="demand-headline">
+                  <span>Current net demand</span>
+                  <div>
+                    <strong className="num">553</strong>
+                    <small>kW</small>
+                  </div>
+                  <p>
+                    <span className="status-dot status-dot-online" />
+                    Within expected operating range
+                  </p>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background">
-                  <div className="h-full w-[55.3%] rounded-full bg-brand" />
+                <div
+                  className="capacity-orbit"
+                  style={{ "--capacity": "55.3%" } as CSSProperties}
+                >
+                  <div>
+                    <strong className="num">55%</strong>
+                    <span>of capacity</span>
+                  </div>
                 </div>
-                <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-                  <span>553 kW used</span>
-                  <span>447 kW headroom</span>
+                <div className="demand-headroom">
+                  <span>Available headroom</span>
+                  <strong className="num">447 kW</strong>
+                  <small>Peak today 777 kW at 13:15</small>
                 </div>
               </div>
-              <p className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground">
-                6 feeders awaiting data — configured, meters not yet connected.
-              </p>
+
+              <div className="chart-legend" aria-label="Chart legend">
+                <span>
+                  <i className="legend-demand" />
+                  Net demand
+                </span>
+                <span>
+                  <i className="legend-solar" />
+                  Solar export
+                </span>
+                <span>
+                  <i className="legend-previous" />
+                  Yesterday
+                </span>
+              </div>
+              <CommandLoadChart />
+              <div className="chart-footnotes">
+                <span>
+                  <CircleGauge />
+                  1,000 kW sanctioned demand
+                </span>
+                <span>
+                  <SunMedium />
+                  Solar offsetting 3.2% of present load
+                </span>
+              </div>
             </CardBody>
           </Card>
+
+          <aside className="decision-rail" aria-label="Requires attention">
+            <div className="decision-rail-heading">
+              <div>
+                <span>Decision queue</span>
+                <h2>Requires attention</h2>
+              </div>
+              <b>2</b>
+            </div>
+
+            <article className="decision-item decision-critical">
+              <span className="decision-marker">
+                <CircleAlert />
+              </span>
+              <div>
+                <div className="decision-meta">
+                  <span>Commercial risk</span>
+                  <code>CC-HT-01</code>
+                </div>
+                <h3>PF penalty exposure is active</h3>
+                <p>
+                  Power factor 0.34 for 30 min. Inspect capacitor bank today.
+                </p>
+                <button>
+                  Review power quality <ArrowRight />
+                </button>
+              </div>
+            </article>
+
+            <article className="decision-item decision-warning">
+              <span className="decision-marker">
+                <Zap />
+              </span>
+              <div>
+                <div className="decision-meta">
+                  <span>Metering fault</span>
+                  <code>TA-HT-01</code>
+                </div>
+                <h3>Probable CT circuit fault</h3>
+                <p>
+                  Voltage present with near-zero current for more than 6 hours.
+                </p>
+                <button>
+                  Open investigation <ArrowRight />
+                </button>
+              </div>
+            </article>
+
+            <article className="decision-item decision-opportunity">
+              <span className="decision-marker">
+                <Sparkles />
+              </span>
+              <div>
+                <div className="decision-meta">
+                  <span>Opportunity</span>
+                </div>
+                <h3>Solar is covering local demand</h3>
+                <p>
+                  160 kWh exported today. Review dispatch window after 14:00.
+                </p>
+              </div>
+            </article>
+
+            <div className="decision-clear">
+              <CheckCircle2 />
+              <span>
+                <strong>No capacity risk</strong>Demand remains 447 kW below the
+                sanctioned limit.
+              </span>
+            </div>
+          </aside>
         </section>
 
-        {/* table + alarms */}
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,.75fr)]">
-          <Card className="overflow-hidden">
+        <section className="command-secondary-grid">
+          <Card>
             <CardHeader
-              title="Sites & Feeders"
-              subtitle="Live metering hierarchy"
+              title="Site contribution"
+              subtitle="Where active demand is concentrated right now"
               action={
-                <span className="num inline-flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                  <span className="text-online">4</span> / 10 online
-                  <ArrowUpRight className="size-3.5" />
-                </span>
+                <SectionLink href="/power-flow" label="View power flow" />
               }
             />
-            <div className="border-t border-border">
-              <FeederTable rows={FEEDERS} />
-            </div>
+            <CardBody>
+              <div className="site-contribution-list">
+                {FEEDER_LOAD.map((item, index) => (
+                  <div className="site-contribution-row" key={item.label}>
+                    <span className="site-rank num">0{index + 1}</span>
+                    <div className="site-copy">
+                      <strong>{item.label}</strong>
+                      <small>{item.sub}</small>
+                    </div>
+                    <div className="contribution-track">
+                      <span
+                        style={{
+                          width: `${Math.max(item.pct, 2)}%`,
+                          background: item.color,
+                        }}
+                      />
+                    </div>
+                    <strong className="num contribution-value">
+                      {item.value}
+                    </strong>
+                    <span className="num contribution-pct">{item.pct}%</span>
+                  </div>
+                ))}
+              </div>
+              <div className="contribution-summary">
+                <span>NASTP Delta carries nearly all current site load</span>
+                <strong className="num">98%</strong>
+              </div>
+            </CardBody>
           </Card>
 
           <Card>
             <CardHeader
-              title="Active Alarms"
-              subtitle="2 active · 1 acknowledged"
-              action={
-                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                  View all
-                </Button>
-              }
+              title="Operational pulse"
+              subtitle="Most meaningful system events, newest first"
+              action={<SectionLink href="/alarms" label="All events" />}
             />
-            <CardBody className="space-y-3">
-              {ALARMS.map((alarm, i) => (
-                <AlarmItem key={`${alarm.code}-${i}`} alarm={alarm} />
-              ))}
+            <CardBody>
+              <div className="event-timeline">
+                {ALARMS.map((alarm, index) => (
+                  <article
+                    className={`event-row event-${alarm.severity}`}
+                    key={`${alarm.code}-${index}`}
+                  >
+                    <span className="event-node" />
+                    <div>
+                      <div className="event-meta">
+                        <code>{alarm.code}</code>
+                        <time>{alarm.time}</time>
+                      </div>
+                      <p>{alarm.message}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </CardBody>
           </Card>
         </section>
+
+        <Card className="overflow-hidden">
+          <CardHeader
+            title="Metering network"
+            subtitle="Live hierarchy, data confidence and field connectivity"
+            action={
+              <div className="metering-status">
+                <span>
+                  <i />4 online
+                </span>
+                <span>6 awaiting data</span>
+              </div>
+            }
+          />
+          <div className="border-t border-border">
+            <FeederTable rows={FEEDERS} />
+          </div>
+        </Card>
       </div>
     </AppShell>
   );
