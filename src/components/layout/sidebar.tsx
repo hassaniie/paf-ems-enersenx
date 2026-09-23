@@ -98,8 +98,9 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       {
         label: "Analytics",
         icon: Activity,
-        href: "#analytics",
+        href: "/analytics",
         roles: ALL_ROLES,
+        state: "ready",
       },
       {
         label: "Command Reports",
