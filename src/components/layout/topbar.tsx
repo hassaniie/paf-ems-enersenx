@@ -74,6 +74,7 @@ export function Topbar({
         "/alarms": "Response workflow",
         "/power-quality": "Electrical health",
         "/analytics": "Historical intelligence",
+        "/reports": "Formal reporting",
       } as Record<string, string>
     )[pathname] ?? "Energy operations";
   return (

@@ -105,8 +105,9 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       {
         label: "Command Reports",
         icon: FileText,
-        href: "#reports",
+        href: "/reports",
         roles: OPERATORS,
+        state: "ready",
       },
       {
         label: "Energy Quotas",
