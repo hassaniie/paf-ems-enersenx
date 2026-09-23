@@ -34,12 +34,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
-import { useOrganization } from "./organization-provider";
+import { useScopedOrganization } from "./use-scoped-organization";
 
 type Filter = "all" | MeterStatus | Transport | MeterClass | "derived";
 
 export function OrganizationWorkspace() {
-  const { store, ready, create, update, remove, reset } = useOrganization();
+  const { store, ready, create, update, remove, reset } =
+    useScopedOrganization();
   const { role, canManageOrganization } = useShell();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
@@ -727,7 +728,7 @@ function AssetEditor({
             </small>
             <h2>{mode === "create" ? "Add asset" : existing?.name}</h2>
           </div>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Close asset editor">
             <X />
           </button>
         </header>

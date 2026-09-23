@@ -35,24 +35,35 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import { useAlarms } from "./alarm-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 
 type AlarmFilter =
   "all" | AlarmSeverity | AlarmLifecycle | AlarmCategory | "unassigned";
 
 export function AlarmsWorkspace() {
-  const { store, ready, attentionCount, transition, assign, addNote } =
-    useAlarms();
-  const { role } = useShell();
+  const { store, ready, transition, assign, addNote } = useAlarms();
+  const { store: organization } = useScopedOrganization();
+  const { can } = useShell();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<AlarmFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const canRespond = role !== "Viewer";
+  const canRespond = can("alarms.respond");
 
+  const accessibleAlarms = useMemo(() => {
+    const accessibleTargets = new Set([
+      ...organization.nodes.map((node) => node.id),
+      ...organization.meters.map((meter) => meter.id),
+    ]);
+    return store.alarms.filter((alarm) => accessibleTargets.has(alarm.meterId));
+  }, [organization.meters, organization.nodes, store.alarms]);
+  const attentionCount = accessibleAlarms.filter(
+    (alarm) => alarm.lifecycle !== "cleared" && alarm.severity !== "info",
+  ).length;
   const alarms = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     const severityOrder = { critical: 0, warning: 1, info: 2 };
-    return store.alarms
+    return accessibleAlarms
       .filter((alarm) => {
         if (
           normalized &&
@@ -81,21 +92,21 @@ export function AlarmsWorkspace() {
           new Date(b.raisedAt).getTime() - new Date(a.raisedAt).getTime()
         );
       });
-  }, [filter, query, store.alarms]);
+  }, [accessibleAlarms, filter, query]);
 
   const selected =
-    store.alarms.find((alarm) => alarm.id === selectedId) ?? null;
+    accessibleAlarms.find((alarm) => alarm.id === selectedId) ?? null;
   const counts = {
-    critical: store.alarms.filter(
+    critical: accessibleAlarms.filter(
       (alarm) => alarm.severity === "critical" && alarm.lifecycle !== "cleared",
     ).length,
-    warning: store.alarms.filter(
+    warning: accessibleAlarms.filter(
       (alarm) => alarm.severity === "warning" && alarm.lifecycle !== "cleared",
     ).length,
-    acknowledged: store.alarms.filter(
+    acknowledged: accessibleAlarms.filter(
       (alarm) => alarm.lifecycle === "acknowledged",
     ).length,
-    cleared: store.alarms.filter((alarm) => alarm.lifecycle === "cleared")
+    cleared: accessibleAlarms.filter((alarm) => alarm.lifecycle === "cleared")
       .length,
   };
   const metrics: MetricRibbonItem[] = [
@@ -169,11 +180,11 @@ export function AlarmsWorkspace() {
             {attentionCount ? `${attentionCount} require action` : "All clear"}
           </Badge>
           {canRespond &&
-          store.alarms.some((alarm) => alarm.lifecycle === "active") ? (
+          accessibleAlarms.some((alarm) => alarm.lifecycle === "active") ? (
             <Button
               variant="outline"
               onClick={() => {
-                store.alarms
+                accessibleAlarms
                   .filter((alarm) => alarm.lifecycle === "active")
                   .forEach((alarm) => transition(alarm.id, "acknowledged"));
                 notify("All active alarms acknowledged.");
@@ -228,7 +239,7 @@ export function AlarmsWorkspace() {
           </label>
           <span className="alarms-result-count">
             <strong className="num">{alarms.length}</strong> of{" "}
-            {store.alarms.length} events
+            {accessibleAlarms.length} events
           </span>
         </div>
 

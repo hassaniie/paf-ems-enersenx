@@ -45,13 +45,13 @@ type QuotaFilter = "all" | QuotaHealth | QuotaApproval | "unconfigured";
 export function QuotasWorkspace() {
   const { store, ready, save, transition, remove } = useQuotas();
   const { store: organization } = useOrganization();
-  const { role } = useShell();
+  const { role, can } = useShell();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<QuotaFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editor, setEditor] = useState<EnergyQuota | "new" | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const canManage = role === "Admin" || role === "Commander";
+  const canManage = can("quotas.manage");
   const nodes = useMemo(
     () => new Map(organization.nodes.map((node) => [node.id, node])),
     [organization.nodes],
@@ -195,7 +195,10 @@ export function QuotasWorkspace() {
                 placeholder="Search area or owner"
               />
               {query ? (
-                <button onClick={() => setQuery("")}>
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label="Clear quota search"
+                >
                   <X />
                 </button>
               ) : null}
@@ -577,7 +580,7 @@ function QuotaEditor({
             <span>{existing ? "Allocation adjustment" : "New allocation"}</span>
             <h2>{existing ? "Adjust energy quota" : "Create energy quota"}</h2>
           </div>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Close quota editor">
             <X />
           </button>
         </header>

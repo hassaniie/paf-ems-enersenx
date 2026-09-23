@@ -25,7 +25,7 @@ import type { UserRole } from "@/components/layout/app-shell";
 import { cn } from "@/lib/cn";
 import { useAlarms } from "@/features/alarms/alarm-provider";
 import { selectEnergySummary } from "@/features/organization/energy-selectors";
-import { useOrganization } from "@/features/organization/organization-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 
 interface NavItem {
   label: string;
@@ -153,8 +153,18 @@ export function Sidebar({
   onMobileClose: () => void;
 }) {
   const pathname = usePathname();
-  const { attentionCount } = useAlarms();
-  const { store } = useOrganization();
+  const { store: alarmStore } = useAlarms();
+  const { store } = useScopedOrganization();
+  const accessibleTargets = new Set([
+    ...store.nodes.map((node) => node.id),
+    ...store.meters.map((meter) => meter.id),
+  ]);
+  const attentionCount = alarmStore.alarms.filter(
+    (alarm) =>
+      accessibleTargets.has(alarm.meterId) &&
+      alarm.lifecycle !== "cleared" &&
+      alarm.severity !== "info",
+  ).length;
   const energy = selectEnergySummary(store);
   return (
     <>
@@ -251,10 +261,14 @@ export function Sidebar({
         </nav>
 
         <div className="sidebar-footer">
-          <a href="#settings" className="sidebar-link">
+          <button
+            className="sidebar-link"
+            disabled
+            title="Settings are unavailable in preview mode"
+          >
             <Settings />
             <span>Settings</span>
-          </a>
+          </button>
           <div className="sidebar-role-note">
             <span>{role.slice(0, 1)}</span>
             <div>

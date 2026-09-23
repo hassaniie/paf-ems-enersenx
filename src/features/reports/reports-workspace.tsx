@@ -30,7 +30,7 @@ import type {
 } from "@/data/client/report-repository";
 import { buildAnalyticsDataset } from "@/features/analytics/analytics-data";
 import { useAlarms } from "@/features/alarms/alarm-provider";
-import { useOrganization } from "@/features/organization/organization-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 import { selectEnergySummary } from "@/features/organization/energy-selectors";
 import { selectPowerQualitySummary } from "@/features/power-quality/power-quality-selectors";
 import { useShell } from "@/components/layout/shell-context";
@@ -83,11 +83,12 @@ const templates: {
 ];
 
 export function ReportsWorkspace() {
-  const { store: organization, ready: organizationReady } = useOrganization();
+  const { store: organization, ready: organizationReady } =
+    useScopedOrganization();
   const { store: alarms } = useAlarms();
   const { store, ready, add, rename, duplicate, setStatus, remove } =
     useReports();
-  const { role } = useShell();
+  const { can, accessibleNodeIds } = useShell();
   const [builderType, setBuilderType] = useState<ReportType | null>(null);
   const [preview, setPreview] = useState<GeneratedReport | null>(null);
   const [query, setQuery] = useState("");
@@ -95,18 +96,29 @@ export function ReportsWorkspace() {
     "all" | "ready" | "archived"
   >("all");
   const [toast, setToast] = useState<string | null>(null);
-  const canManage = role === "Admin" || role === "Commander";
+  const canManage = can("reports.manage");
   const filteredReports = useMemo(
     () =>
       store.reports.filter(
         (report) =>
+          (accessibleNodeIds === null ||
+            (report.scopeMeterId !== "all" &&
+              organization.meters.some(
+                (meter) => meter.id === report.scopeMeterId,
+              ))) &&
           (!query ||
             `${report.title} ${report.scopeLabel}`
               .toLowerCase()
               .includes(query.toLowerCase())) &&
           (statusFilter === "all" || report.status === statusFilter),
       ),
-    [query, statusFilter, store.reports],
+    [
+      accessibleNodeIds,
+      organization.meters,
+      query,
+      statusFilter,
+      store.reports,
+    ],
   );
 
   const notify = (message: string) => {
@@ -199,7 +211,7 @@ export function ReportsWorkspace() {
           subtitle="Retained command records and downloadable report snapshots"
           action={
             <div className="report-library-count">
-              <strong className="num">{store.reports.length}</strong>
+              <strong className="num">{filteredReports.length}</strong>
               <span>total reports</span>
             </div>
           }
@@ -213,7 +225,10 @@ export function ReportsWorkspace() {
               placeholder="Search reports or scope"
             />
             {query ? (
-              <button onClick={() => setQuery("")}>
+              <button
+                onClick={() => setQuery("")}
+                aria-label="Clear report search"
+              >
                 <X />
               </button>
             ) : null}
@@ -349,7 +364,7 @@ function ReportBuilder({
   onGenerate,
 }: {
   initialType: ReportType;
-  organization: ReturnType<typeof useOrganization>["store"];
+  organization: ReturnType<typeof useScopedOrganization>["store"];
   alarmCount: number;
   onClose: () => void;
   onPreview: (report: GeneratedReport) => void;
@@ -422,7 +437,7 @@ function ReportBuilder({
             <h2>Create command report</h2>
             <p>Choose the reporting structure, scope and content.</p>
           </div>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Close report builder">
             <X />
           </button>
         </header>
@@ -653,7 +668,7 @@ function ReportPreview({
               <Download />
               Download HTML
             </Button>
-            <button onClick={onClose}>
+            <button onClick={onClose} aria-label="Close report preview">
               <X />
             </button>
           </div>

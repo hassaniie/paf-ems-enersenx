@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Activity,
   AlertTriangle,
@@ -29,7 +30,7 @@ import {
 import { cn } from "@/lib/cn";
 import { MetricRibbon } from "@/components/primitives/metric-ribbon";
 import { selectEnergySummary } from "@/features/organization/energy-selectors";
-import { useOrganization } from "@/features/organization/organization-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 
 type NodeStatus = "online" | "awaiting" | "faulty" | "exporting";
 type ViewMode = "live" | "fault" | "load" | "quality";
@@ -225,61 +226,89 @@ const modes: { id: ViewMode; label: string; icon: typeof Radio }[] = [
   { id: "quality", label: "Power quality", icon: Waves },
 ];
 
+const topologyNodeScope: Record<string, string> = {
+  grid: "lahore-site",
+  site: "lahore-site",
+  mess: "officers-mess",
+  iqbal: "iqbal-camp",
+  siddiqui: "siddiqui-camp",
+  tech: "tech-area",
+  nastp: "nastp-delta",
+  hospital: "qureshi-camp",
+  solar: "cac-cass",
+};
+
 export function SingleLineDiagram() {
-  const { store } = useOrganization();
+  const { store } = useScopedOrganization();
   const summary = useMemo(() => selectEnergySummary(store), [store]);
   const [selectedId, setSelectedId] = useState("site");
   const [mode, setMode] = useState<ViewMode>("live");
   const [paused, setPaused] = useState(false);
   const [scale, setScale] = useState(1);
+  const openCommandSearch = () =>
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "k", metaKey: true }),
+    );
+  const openFullscreen = async () => {
+    const workspace = document.querySelector<HTMLElement>(
+      ".topology-workspace",
+    );
+    if (workspace?.requestFullscreen) await workspace.requestFullscreen();
+  };
   const recordsByCode = useMemo(
     () => new Map(summary.records.map((record) => [record.meter.code, record])),
     [summary.records],
   );
+  const scopedNodeIds = useMemo(
+    () => new Set(store.nodes.map((node) => node.id)),
+    [store.nodes],
+  );
   const nodes = useMemo(
     () =>
-      nodeTemplates.map((node) => {
-        if (node.id === "grid" || node.id === "site") {
+      nodeTemplates
+        .filter((node) => scopedNodeIds.has(topologyNodeScope[node.id]!))
+        .map((node) => {
+          if (node.id === "grid" || node.id === "site") {
+            return {
+              ...node,
+              value: `${summary.activeLoadKw.toFixed(0)} kW`,
+              energy: `${(summary.energyImportKwh / 1000).toFixed(2)} MWh`,
+              pf: summary.averagePf.toFixed(3),
+              detail:
+                node.id === "site"
+                  ? `${summary.reportingCount} of ${summary.physicalCount} meters reporting`
+                  : node.detail,
+            };
+          }
+          const code = node.id === "hospital" ? "PH-LT-01" : node.code;
+          const record = recordsByCode.get(code);
+          if (!record) return node;
+          const reading = record.live?.lastReading;
+          const status: NodeStatus =
+            node.id === "solar" && record.live?.status === "online"
+              ? "exporting"
+              : record.live?.status === "faulty"
+                ? "faulty"
+                : record.live?.status === "online"
+                  ? "online"
+                  : "awaiting";
           return {
             ...node,
-            value: `${summary.activeLoadKw.toFixed(0)} kW`,
-            energy: `${(summary.energyImportKwh / 1000).toFixed(2)} MWh`,
-            pf: summary.averagePf.toFixed(3),
-            detail:
-              node.id === "site"
-                ? `${summary.reportingCount} of ${summary.physicalCount} meters reporting`
-                : node.detail,
+            label: node.id === "hospital" ? "PAF Hospital" : record.node.name,
+            value: reading
+              ? `${reading.activePowerKw.toFixed(reading.activePowerKw % 1 ? 1 : 0)} kW`
+              : status === "faulty"
+                ? "CT fault"
+                : "No data",
+            status,
+            energy: reading
+              ? `${(reading.energyImportKwh / 1000).toFixed(2)} MWh`
+              : "—",
+            pf: reading?.powerFactor?.toFixed(3) ?? "—",
+            packet: record.live?.lastReadingAt ? "Live" : "Never",
           };
-        }
-        const code = node.id === "hospital" ? "PH-LT-01" : node.code;
-        const record = recordsByCode.get(code);
-        if (!record) return node;
-        const reading = record.live?.lastReading;
-        const status: NodeStatus =
-          node.id === "solar" && record.live?.status === "online"
-            ? "exporting"
-            : record.live?.status === "faulty"
-              ? "faulty"
-              : record.live?.status === "online"
-                ? "online"
-                : "awaiting";
-        return {
-          ...node,
-          label: node.id === "hospital" ? "PAF Hospital" : record.node.name,
-          value: reading
-            ? `${reading.activePowerKw.toFixed(reading.activePowerKw % 1 ? 1 : 0)} kW`
-            : status === "faulty"
-              ? "CT fault"
-              : "No data",
-          status,
-          energy: reading
-            ? `${(reading.energyImportKwh / 1000).toFixed(2)} MWh`
-            : "—",
-          pf: reading?.powerFactor?.toFixed(3) ?? "—",
-          packet: record.live?.lastReadingAt ? "Live" : "Never",
-        };
-      }),
-    [recordsByCode, summary],
+        }),
+    [recordsByCode, scopedNodeIds, summary],
   );
   const selected = nodes.find((node) => node.id === selectedId) ?? nodes[1]!;
   const flowMetrics = [
@@ -366,7 +395,7 @@ export function SingleLineDiagram() {
             })}
           </div>
           <div className="topology-tools">
-            <button className="topology-search">
+            <button className="topology-search" onClick={openCommandSearch}>
               <Search />
               <span>Find an asset</span>
               <kbd>⌘K</kbd>
@@ -375,10 +404,18 @@ export function SingleLineDiagram() {
               {paused ? <Play /> : <Pause />}
               <span>{paused ? "Resume" : "Pause"}</span>
             </button>
-            <button title="Fit network" onClick={() => setScale(1)}>
+            <button
+              aria-label="Fit network"
+              title="Fit network"
+              onClick={() => setScale(1)}
+            >
               <Expand />
             </button>
-            <button title="Fullscreen">
+            <button
+              aria-label="Open topology fullscreen"
+              title="Fullscreen"
+              onClick={() => void openFullscreen()}
+            >
               <Maximize2 />
             </button>
           </div>
@@ -526,6 +563,7 @@ export function SingleLineDiagram() {
             </div>
             <div className="topology-zoom">
               <button
+                aria-label="Zoom in"
                 onClick={() =>
                   setScale((value) => Math.min(1.16, value + 0.08))
                 }
@@ -534,6 +572,7 @@ export function SingleLineDiagram() {
               </button>
               <span className="num">{Math.round(scale * 100)}%</span>
               <button
+                aria-label="Zoom out"
                 onClick={() =>
                   setScale((value) => Math.max(0.76, value - 0.08))
                 }
@@ -542,7 +581,13 @@ export function SingleLineDiagram() {
               </button>
             </div>
           </div>
-          <AssetInspector node={selected} />
+          <AssetInspector
+            node={selected}
+            onFocus={() => {
+              setMode("live");
+              setScale(1);
+            }}
+          />
         </div>
       </section>
 
@@ -556,9 +601,12 @@ export function SingleLineDiagram() {
             <strong>Power factor below target</strong>
             <p>CAC / CASS is operating at 0.340 PF.</p>
           </div>
-          <button>
+          <Link
+            href="/power-quality"
+            aria-label="Review power quality exposure"
+          >
             <ChevronRight />
-          </button>
+          </Link>
         </article>
         <article>
           <span className="footrail-icon export">
@@ -571,9 +619,9 @@ export function SingleLineDiagram() {
               {summary.exportKw.toFixed(0)} kW is registered as reverse flow.
             </p>
           </div>
-          <button>
+          <Link href="/analytics" aria-label="Review reverse flow analytics">
             <ChevronRight />
-          </button>
+          </Link>
         </article>
         <article>
           <span className="footrail-icon brand">
@@ -590,22 +638,32 @@ export function SingleLineDiagram() {
             </strong>
             <p>{summary.awaitingCount} configured meters await field data.</p>
           </div>
-          <button>
+          <Link href="/meters" aria-label="Review telemetry coverage">
             <ChevronRight />
-          </button>
+          </Link>
         </article>
       </section>
     </div>
   );
 }
 
-function AssetInspector({ node }: { node: EnergyNode }) {
+function AssetInspector({
+  node,
+  onFocus,
+}: {
+  node: EnergyNode;
+  onFocus: () => void;
+}) {
   const Icon = node.icon;
   return (
     <aside className="topology-inspector" aria-live="polite">
       <div className="inspector-eyebrow">
         <span>Asset intelligence</span>
-        <button title="Focus path">
+        <button
+          aria-label="Focus selected path"
+          title="Focus path"
+          onClick={onFocus}
+        >
           <Focus />
         </button>
       </div>
@@ -682,14 +740,14 @@ function AssetInspector({ node }: { node: EnergyNode }) {
         </div>
       ) : null}
       <div className="inspector-actions">
-        <button className="primary">
+        <Link className="primary" href="/organization">
           <ArrowUpRight />
           Open asset detail
-        </button>
-        <button>
+        </Link>
+        <Link href="/analytics">
           <Clock3 />
           History
-        </button>
+        </Link>
       </div>
       <p className="inspector-help">
         <Zap />

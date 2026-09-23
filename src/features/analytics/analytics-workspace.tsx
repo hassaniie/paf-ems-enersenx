@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { formatEnergy, formatPkr } from "@/domain";
-import { useOrganization } from "@/features/organization/organization-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 import { cn } from "@/lib/cn";
 import {
   AnalyticsTrendChart,
@@ -48,7 +48,7 @@ const metrics: { id: AnalyticsMetric; label: string }[] = [
 ];
 
 export function AnalyticsWorkspace() {
-  const { store, ready } = useOrganization();
+  const { store, ready } = useScopedOrganization();
   const [range, setRange] = useState<AnalyticsRange>("30D");
   const [metric, setMetric] = useState<AnalyticsMetric>("demand");
   const [compare, setCompare] = useState(true);
@@ -185,7 +185,11 @@ export function AnalyticsWorkspace() {
             </button>
           ))}
         </div>
-        <button className="analytics-date">
+        <button
+          className="analytics-date"
+          disabled
+          title="Date follows the selected reporting range"
+        >
           <CalendarDays />
           <span>
             {range === "24H"

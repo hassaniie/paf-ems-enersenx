@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { useAlarms } from "@/features/alarms/alarm-provider";
 import { selectEnergySummary } from "@/features/organization/energy-selectors";
-import { useOrganization } from "@/features/organization/organization-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 
 function SectionLink({ href, label }: { href: string; label: string }) {
   return (
@@ -43,7 +43,7 @@ function SectionLink({ href, label }: { href: string; label: string }) {
 }
 
 export default function OverviewPage() {
-  const { store } = useOrganization();
+  const { store } = useScopedOrganization();
   const { store: alarmStore, attentionCount } = useAlarms();
   const summary = useMemo(() => selectEnergySummary(store), [store]);
   const load = Math.round(summary.activeLoadKw);
@@ -261,9 +261,9 @@ export default function OverviewPage() {
                 <p>
                   Power factor 0.34 for 30 min. Inspect capacitor bank today.
                 </p>
-                <button>
+                <Link href="/power-quality">
                   Review power quality <ArrowRight />
-                </button>
+                </Link>
               </div>
             </article>
 
@@ -280,9 +280,9 @@ export default function OverviewPage() {
                 <p>
                   Voltage present with near-zero current for more than 6 hours.
                 </p>
-                <button>
+                <Link href="/alarms">
                   Open investigation <ArrowRight />
-                </button>
+                </Link>
               </div>
             </article>
 

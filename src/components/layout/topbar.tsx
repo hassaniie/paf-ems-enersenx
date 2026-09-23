@@ -26,6 +26,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/cn";
 import { useAlarms } from "@/features/alarms/alarm-provider";
 import type { OperationalAlarm } from "@/data/client/alarm-repository";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 
 const roles: { value: UserRole; description: string }[] = [
   { value: "Admin", description: "Full configuration and access" },
@@ -48,7 +49,18 @@ export function Topbar({
   onMenu: () => void;
 }) {
   const pathname = usePathname();
-  const { store: alarmStore, attentionCount } = useAlarms();
+  const { store: alarmStore } = useAlarms();
+  const { store: organization } = useScopedOrganization();
+  const accessibleTargets = new Set([
+    ...organization.nodes.map((node) => node.id),
+    ...organization.meters.map((meter) => meter.id),
+  ]);
+  const scopedAlarms = alarmStore.alarms.filter((alarm) =>
+    accessibleTargets.has(alarm.meterId),
+  );
+  const attentionCount = scopedAlarms.filter(
+    (alarm) => alarm.lifecycle !== "cleared" && alarm.severity !== "info",
+  ).length;
   const [panel, setPanel] = useState<"search" | "alerts" | "profile" | null>(
     null,
   );
@@ -154,7 +166,7 @@ export function Topbar({
         />
       ) : null}
       {panel === "alerts" ? (
-        <AlertsMenu onClose={() => setPanel(null)} alarms={alarmStore.alarms} />
+        <AlertsMenu onClose={() => setPanel(null)} alarms={scopedAlarms} />
       ) : null}
       {panel === "profile" ? (
         <ProfileMenu
@@ -174,6 +186,24 @@ function SearchPalette({
   onClose: () => void;
   attentionCount: number;
 }) {
+  const [query, setQuery] = useState("");
+  const entries = [
+    { href: "/", label: "Command Center", meta: "Overview", icon: Gauge },
+    {
+      href: "/power-flow",
+      label: "Power Flow",
+      meta: "Live topology",
+      icon: Radio,
+    },
+    {
+      href: "/alarms",
+      label: "Open active alarms",
+      meta: `${attentionCount} exceptions`,
+      icon: TriangleAlert,
+    },
+  ].filter((entry) =>
+    `${entry.label} ${entry.meta}`.toLowerCase().includes(query.toLowerCase()),
+  );
   return (
     <div
       className="command-palette"
@@ -185,41 +215,34 @@ function SearchPalette({
         <Search />
         <input
           autoFocus
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
           placeholder="Search meters, sites, pages or commands…"
         />
         <kbd>ESC</kbd>
       </div>
       <div className="palette-content">
         <p>Quick navigation</p>
-        <Link href="/" onClick={onClose}>
-          <span>
-            <Gauge />
-            Command Center
-          </span>
-          <small>Overview</small>
-        </Link>
-        <Link href="/power-flow" onClick={onClose}>
-          <span>
-            <Radio />
-            Power Flow
-          </span>
-          <small>Live topology</small>
-        </Link>
-        <Link href="/alarms" onClick={onClose}>
-          <span>
-            <TriangleAlert />
-            Open active alarms
-          </span>
-          <small>{attentionCount} exceptions</small>
-        </Link>
+        {entries.map((entry) => {
+          const Icon = entry.icon;
+          return (
+            <Link href={entry.href} onClick={onClose} key={entry.href}>
+              <span>
+                <Icon />
+                {entry.label}
+              </span>
+              <small>{entry.meta}</small>
+            </Link>
+          );
+        })}
+        {!entries.length ? (
+          <div className="palette-empty">No matching pages or commands.</div>
+        ) : null}
       </div>
       <footer>
+        <span>Type to filter available destinations</span>
         <span>
-          <kbd>↑</kbd>
-          <kbd>↓</kbd> Navigate
-        </span>
-        <span>
-          <kbd>↵</kbd> Open
+          <kbd>ESC</kbd> Close
         </span>
       </footer>
     </div>
@@ -247,7 +270,7 @@ function AlertsMenu({
           <strong>Notifications</strong>
           <small>{active.length} recent open events</small>
         </div>
-        <button onClick={onClose}>
+        <button onClick={onClose} aria-label="Close notifications">
           <X />
         </button>
       </header>
@@ -331,19 +354,25 @@ function ProfileMenu({
         ))}
       </div>
       <div className="profile-links">
-        <a href="#profile">
+        <button
+          disabled
+          title="Profile management requires authentication integration"
+        >
           <UserRound />
           Profile
-        </a>
-        <a href="#settings">
+        </button>
+        <button disabled title="Preferences are unavailable in preview mode">
           <Settings />
           Preferences
-        </a>
-        <a href="#help">
+        </button>
+        <button
+          disabled
+          title="Support integration is unavailable in preview mode"
+        >
           <HelpCircle />
           Help & support
-        </a>
-        <button>
+        </button>
+        <button disabled title="Sign out requires authentication integration">
           <LogOut />
           Sign out
         </button>

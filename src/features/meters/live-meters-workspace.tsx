@@ -37,7 +37,7 @@ import {
   selectEnergySummary,
   type MeterRecord,
 } from "@/features/organization/energy-selectors";
-import { useOrganization } from "@/features/organization/organization-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 
 type MeterFilter = "all" | MeterStatus | MeterClass | Transport | "derived";
 
@@ -49,14 +49,14 @@ export function LiveMetersWorkspace() {
     setSimulationRunning,
     setMeterStatus,
     refreshMeter,
-  } = useOrganization();
-  const { role, canManageOrganization } = useShell();
+  } = useScopedOrganization();
+  const { can, canManageOrganization } = useShell();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<MeterFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const summary = useMemo(() => selectEnergySummary(store), [store]);
-  const canOperate = role !== "Viewer";
+  const canOperate = can("meters.operate");
 
   const records = useMemo(() => {
     const normalized = query.trim().toLowerCase();

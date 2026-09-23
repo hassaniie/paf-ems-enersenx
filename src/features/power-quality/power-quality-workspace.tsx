@@ -23,7 +23,7 @@ import {
 import type { MeterClass } from "@/domain";
 import { POWER_FACTOR, POWER_QUALITY } from "@/config/thresholds";
 import { useAlarms } from "@/features/alarms/alarm-provider";
-import { useOrganization } from "@/features/organization/organization-provider";
+import { useScopedOrganization } from "@/features/organization/use-scoped-organization";
 import {
   MetricRibbon,
   type MetricRibbonItem,
@@ -42,7 +42,7 @@ import {
 type QualityFilter = "all" | QualityState | MeterClass;
 
 export function PowerQualityWorkspace() {
-  const { store, ready } = useOrganization();
+  const { store, ready } = useScopedOrganization();
   const { store: alarmStore } = useAlarms();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<QualityFilter>("all");

@@ -32,13 +32,25 @@ export function DashboardToolbar() {
             </button>
           ))}
         </div>
-        <Button variant="ghost" size="sm" className="hidden md:inline-flex">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hidden md:inline-flex"
+          disabled
+          title="Date follows the selected range"
+        >
           <CalendarDays />
           21 Sep 2026
         </Button>
       </div>
       <div className="flex items-center gap-1.5">
-        <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hidden sm:inline-flex"
+          disabled
+          title="No additional dashboard filters are available"
+        >
           <SlidersHorizontal />
           Filters
         </Button>
