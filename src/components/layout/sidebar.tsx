@@ -60,10 +60,11 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Monitoring",
     items: [
       {
-        label: "Sites & Meters",
+        label: "Organization",
         icon: Network,
-        href: "#sites",
+        href: "/organization",
         roles: ALL_ROLES,
+        state: "ready",
       },
       {
         label: "Alarms",
