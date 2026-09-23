@@ -1,5 +1,4 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { OrganizationProvider } from "@/features/organization/organization-provider";
 import { OrganizationWorkspace } from "@/features/organization/organization-workspace";
 
 export default function OrganizationPage() {
@@ -8,9 +7,7 @@ export default function OrganizationPage() {
       title="Organization"
       subtitle="PAF Base, Lahore · Assets and telemetry"
     >
-      <OrganizationProvider>
-        <OrganizationWorkspace />
-      </OrganizationProvider>
+      <OrganizationWorkspace />
     </AppShell>
   );
 }

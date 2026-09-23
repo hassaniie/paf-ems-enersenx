@@ -67,6 +67,13 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
         state: "ready",
       },
       {
+        label: "Live Meters",
+        icon: Gauge,
+        href: "/meters",
+        roles: ALL_ROLES,
+        state: "ready",
+      },
+      {
         label: "Alarms",
         icon: Bell,
         href: "#alarms",

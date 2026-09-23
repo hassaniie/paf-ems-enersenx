@@ -217,6 +217,9 @@ const reading = (
   powerFactor,
   energyImportKwh,
   energyExportKwh,
+  voltageV: [6350, 6360, 6342] as const,
+  currentA: [29.1, 30.4, 28.8] as const,
+  frequencyHz: 49.98,
 });
 
 export const ORGANIZATION_LIVE_STATES: MeterLiveState[] = [

@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -14,50 +16,20 @@ import {
 import { CommandLoadChart } from "@/components/charts/command-load-chart";
 import { DashboardToolbar } from "@/components/dashboard-toolbar";
 import { AppShell } from "@/components/layout/app-shell";
-import { FeederTable } from "@/components/primitives/feeder-table";
-import { MetricRibbon } from "@/components/primitives/metric-ribbon";
+import {
+  FeederTable,
+  type FeederRow,
+} from "@/components/primitives/feeder-table";
+import {
+  MetricRibbon,
+  type MetricRibbonItem,
+} from "@/components/primitives/metric-ribbon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { ALARMS, FEEDERS, FEEDER_LOAD } from "@/data/mock/dashboard";
-
-const metrics = [
-  {
-    label: "Active load",
-    value: "553",
-    unit: "kW",
-    note: "+4.1% vs yesterday",
-    tone: "neutral",
-  },
-  {
-    label: "Energy today",
-    value: "8.74",
-    unit: "MWh",
-    note: "−2.3% vs baseline",
-    tone: "good",
-  },
-  {
-    label: "Solar export",
-    value: "160",
-    unit: "kWh",
-    note: "18 kW live",
-    tone: "export",
-  },
-  {
-    label: "Average PF",
-    value: "0.930",
-    unit: "",
-    note: "2 feeders below target",
-    tone: "warning",
-  },
-  {
-    label: "Meters reporting",
-    value: "4/10",
-    unit: "",
-    note: "6 awaiting data",
-    tone: "info",
-  },
-] as const;
+import { ALARMS } from "@/data/mock/dashboard";
+import { selectEnergySummary } from "@/features/organization/energy-selectors";
+import { useOrganization } from "@/features/organization/organization-provider";
 
 function SectionLink({ href, label }: { href: string; label: string }) {
   return (
@@ -71,6 +43,95 @@ function SectionLink({ href, label }: { href: string; label: string }) {
 }
 
 export default function OverviewPage() {
+  const { store } = useOrganization();
+  const summary = useMemo(() => selectEnergySummary(store), [store]);
+  const load = Math.round(summary.activeLoadKw);
+  const capacityPct = Math.min(100, (load / 1000) * 100);
+  const headroom = Math.max(0, 1000 - load);
+  const metrics: MetricRibbonItem[] = [
+    {
+      label: "Active load",
+      value: String(load),
+      unit: "kW",
+      note: "Shared live snapshot",
+      tone: "neutral",
+    },
+    {
+      label: "Energy registered",
+      value: (summary.energyImportKwh / 1000).toFixed(2),
+      unit: "MWh",
+      note: "Across reporting meters",
+      tone: "good",
+    },
+    {
+      label: "Export registered",
+      value: summary.energyExportKwh.toFixed(0),
+      unit: "kWh",
+      note: `${summary.exportKw.toFixed(0)} kW live`,
+      tone: "export",
+    },
+    {
+      label: "Average PF",
+      value: summary.averagePf.toFixed(3),
+      note: "Across available readings",
+      tone: summary.averagePf < 0.9 ? "warning" : "good",
+    },
+    {
+      label: "Meters reporting",
+      value: `${summary.reportingCount}/${summary.physicalCount}`,
+      note: `${summary.awaitingCount} awaiting data`,
+      tone: "info",
+    },
+  ];
+  const feeders: FeederRow[] = summary.records.map(({ meter, node, live }) => {
+    let depth = 0;
+    let parentId = node.parentId;
+    while (parentId && parentId !== "lahore-site") {
+      depth += 1;
+      parentId =
+        store.nodes.find((item) => item.id === parentId)?.parentId ?? null;
+    }
+    return {
+      name: node.name,
+      code: meter.code,
+      cls: meter.class,
+      transport: meter.transport,
+      status: live?.status ?? "awaiting-data",
+      powerKw: live?.lastReading?.activePowerKw,
+      pf: live?.lastReading?.powerFactor,
+      depth,
+      derived: meter.role === "derived",
+    };
+  });
+  const contributions = summary.records
+    .filter(
+      ({ meter, live }) =>
+        meter.role !== "derived" &&
+        live?.status === "online" &&
+        live.lastReading,
+    )
+    .sort(
+      (a, b) =>
+        Math.abs(b.live?.lastReading?.activePowerKw ?? 0) -
+        Math.abs(a.live?.lastReading?.activePowerKw ?? 0),
+    )
+    .slice(0, 3)
+    .map(({ node, meter, live }, index) => ({
+      label: node.name,
+      sub: meter.code,
+      value: `${Math.abs(live?.lastReading?.activePowerKw ?? 0).toFixed(0)} kW`,
+      pct: load
+        ? Math.round(
+            (Math.abs(live?.lastReading?.activePowerKw ?? 0) / load) * 100,
+          )
+        : 0,
+      color:
+        index === 1
+          ? "var(--flow-export)"
+          : index === 2
+            ? "var(--viz-3)"
+            : "var(--viz-1)",
+    }));
   return (
     <AppShell
       title="Command Center"
@@ -121,7 +182,7 @@ export default function OverviewPage() {
                 <div className="demand-headline">
                   <span>Current net demand</span>
                   <div>
-                    <strong className="num">553</strong>
+                    <strong className="num">{load}</strong>
                     <small>kW</small>
                   </div>
                   <p>
@@ -131,16 +192,16 @@ export default function OverviewPage() {
                 </div>
                 <div
                   className="capacity-orbit"
-                  style={{ "--capacity": "55.3%" } as CSSProperties}
+                  style={{ "--capacity": `${capacityPct}%` } as CSSProperties}
                 >
                   <div>
-                    <strong className="num">55%</strong>
+                    <strong className="num">{capacityPct.toFixed(0)}%</strong>
                     <span>of capacity</span>
                   </div>
                 </div>
                 <div className="demand-headroom">
                   <span>Available headroom</span>
-                  <strong className="num">447 kW</strong>
+                  <strong className="num">{headroom} kW</strong>
                   <small>Peak today 777 kW at 13:15</small>
                 </div>
               </div>
@@ -230,7 +291,8 @@ export default function OverviewPage() {
                 </div>
                 <h3>Solar is covering local demand</h3>
                 <p>
-                  160 kWh exported today. Review dispatch window after 14:00.
+                  {summary.energyExportKwh.toFixed(0)} kWh registered. Review
+                  dispatch and reverse-flow conditions.
                 </p>
               </div>
             </article>
@@ -238,8 +300,8 @@ export default function OverviewPage() {
             <div className="decision-clear">
               <CheckCircle2 />
               <span>
-                <strong>No capacity risk</strong>Demand remains 447 kW below the
-                sanctioned limit.
+                <strong>No capacity risk</strong>Demand remains {headroom} kW
+                below the sanctioned limit.
               </span>
             </div>
           </aside>
@@ -256,7 +318,7 @@ export default function OverviewPage() {
             />
             <CardBody>
               <div className="site-contribution-list">
-                {FEEDER_LOAD.map((item, index) => (
+                {contributions.map((item, index) => (
                   <div className="site-contribution-row" key={item.label}>
                     <span className="site-rank num">0{index + 1}</span>
                     <div className="site-copy">
@@ -279,8 +341,11 @@ export default function OverviewPage() {
                 ))}
               </div>
               <div className="contribution-summary">
-                <span>NASTP Delta carries nearly all current site load</span>
-                <strong className="num">98%</strong>
+                <span>
+                  {contributions[0]?.label ?? "No reporting feeder"} carries the
+                  largest measured load
+                </span>
+                <strong className="num">{contributions[0]?.pct ?? 0}%</strong>
               </div>
             </CardBody>
           </Card>
@@ -320,14 +385,15 @@ export default function OverviewPage() {
             action={
               <div className="metering-status">
                 <span>
-                  <i />4 online
+                  <i />
+                  {summary.reportingCount} online
                 </span>
-                <span>6 awaiting data</span>
+                <span>{summary.awaitingCount} awaiting data</span>
               </div>
             }
           />
           <div className="border-t border-border">
-            <FeederTable rows={FEEDERS} />
+            <FeederTable rows={feeders} />
           </div>
         </Card>
       </div>

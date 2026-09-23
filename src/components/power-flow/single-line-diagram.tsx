@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { MetricRibbon } from "@/components/primitives/metric-ribbon";
+import { selectEnergySummary } from "@/features/organization/energy-selectors";
+import { useOrganization } from "@/features/organization/organization-provider";
 
 type NodeStatus = "online" | "awaiting" | "faulty" | "exporting";
 type ViewMode = "live" | "fault" | "load" | "quality";
@@ -47,7 +49,7 @@ type EnergyNode = {
   packet: string;
 };
 
-const nodes: EnergyNode[] = [
+const nodeTemplates: EnergyNode[] = [
   {
     id: "grid",
     label: "LESCO Grid",
@@ -223,53 +225,101 @@ const modes: { id: ViewMode; label: string; icon: typeof Radio }[] = [
   { id: "quality", label: "Power quality", icon: Waves },
 ];
 
-const flowMetrics = [
-  {
-    label: "Net demand",
-    value: "553",
-    unit: "kW",
-    note: "55% of capacity",
-    tone: "neutral",
-  },
-  {
-    label: "Grid condition",
-    value: "Importing",
-    unit: "",
-    note: "Normal utility supply",
-    tone: "good",
-  },
-  {
-    label: "Solar contribution",
-    value: "18",
-    unit: "kW",
-    note: "160 kWh today",
-    tone: "export",
-  },
-  {
-    label: "Meters reporting",
-    value: "4/10",
-    unit: "",
-    note: "6 awaiting data",
-    tone: "info",
-  },
-  {
-    label: "Active exceptions",
-    value: "2",
-    unit: "",
-    note: "1 commercial risk",
-    tone: "warning",
-  },
-] as const;
-
 export function SingleLineDiagram() {
-  const [selected, setSelected] = useState<EnergyNode>(nodes[1]!);
+  const { store } = useOrganization();
+  const summary = useMemo(() => selectEnergySummary(store), [store]);
+  const [selectedId, setSelectedId] = useState("site");
   const [mode, setMode] = useState<ViewMode>("live");
   const [paused, setPaused] = useState(false);
   const [scale, setScale] = useState(1);
+  const recordsByCode = useMemo(
+    () => new Map(summary.records.map((record) => [record.meter.code, record])),
+    [summary.records],
+  );
+  const nodes = useMemo(
+    () =>
+      nodeTemplates.map((node) => {
+        if (node.id === "grid" || node.id === "site") {
+          return {
+            ...node,
+            value: `${summary.activeLoadKw.toFixed(0)} kW`,
+            energy: `${(summary.energyImportKwh / 1000).toFixed(2)} MWh`,
+            pf: summary.averagePf.toFixed(3),
+            detail:
+              node.id === "site"
+                ? `${summary.reportingCount} of ${summary.physicalCount} meters reporting`
+                : node.detail,
+          };
+        }
+        const code = node.id === "hospital" ? "PH-LT-01" : node.code;
+        const record = recordsByCode.get(code);
+        if (!record) return node;
+        const reading = record.live?.lastReading;
+        const status: NodeStatus =
+          node.id === "solar" && record.live?.status === "online"
+            ? "exporting"
+            : record.live?.status === "faulty"
+              ? "faulty"
+              : record.live?.status === "online"
+                ? "online"
+                : "awaiting";
+        return {
+          ...node,
+          label: node.id === "hospital" ? "PAF Hospital" : record.node.name,
+          value: reading
+            ? `${reading.activePowerKw.toFixed(reading.activePowerKw % 1 ? 1 : 0)} kW`
+            : status === "faulty"
+              ? "CT fault"
+              : "No data",
+          status,
+          energy: reading
+            ? `${(reading.energyImportKwh / 1000).toFixed(2)} MWh`
+            : "—",
+          pf: reading?.powerFactor?.toFixed(3) ?? "—",
+          packet: record.live?.lastReadingAt ? "Live" : "Never",
+        };
+      }),
+    [recordsByCode, summary],
+  );
+  const selected = nodes.find((node) => node.id === selectedId) ?? nodes[1]!;
+  const flowMetrics = [
+    {
+      label: "Net demand",
+      value: summary.activeLoadKw.toFixed(0),
+      unit: "kW",
+      note: `${Math.round(summary.activeLoadKw / 10)}% of capacity`,
+      tone: "neutral",
+    },
+    {
+      label: "Grid condition",
+      value: "Importing",
+      note: "Normal utility supply",
+      tone: "good",
+    },
+    {
+      label: "Reverse flow",
+      value: summary.exportKw.toFixed(0),
+      unit: "kW",
+      note: `${summary.energyExportKwh.toFixed(0)} kWh registered`,
+      tone: "export",
+    },
+    {
+      label: "Meters reporting",
+      value: `${summary.reportingCount}/${summary.physicalCount}`,
+      note: `${summary.awaitingCount} awaiting data`,
+      tone: "info",
+    },
+    {
+      label: "Active exceptions",
+      value: String(summary.faultyCount),
+      note: "Field action required",
+      tone: "warning",
+    },
+  ] as const;
   const visibleNodes = useMemo(() => {
     if (mode === "fault") return new Set(["site", "tech", "solar", "nastp"]);
     if (mode === "quality") return new Set(["site", "iqbal", "solar", "nastp"]);
-    return new Set(nodes.map((node) => node.id));
+    return new Set(nodeTemplates.map((node) => node.id));
   }, [mode]);
 
   return (
@@ -422,11 +472,11 @@ export function SingleLineDiagram() {
                   return (
                     <button
                       key={node.id}
-                      onClick={() => setSelected(node)}
+                      onClick={() => setSelectedId(node.id)}
                       className={cn(
                         "topology-node",
                         `topology-node-${node.status}`,
-                        selected.id === node.id && "selected",
+                        selectedId === node.id && "selected",
                         !visibleNodes.has(node.id) && "deemphasized",
                       )}
                       style={{ left: node.x, top: node.y }}
@@ -517,7 +567,9 @@ export function SingleLineDiagram() {
           <div>
             <small>Reverse flow</small>
             <strong>Solar feeding NASTP</strong>
-            <p>18 kW is offsetting downstream demand.</p>
+            <p>
+              {summary.exportKw.toFixed(0)} kW is registered as reverse flow.
+            </p>
           </div>
           <button>
             <ChevronRight />
@@ -529,8 +581,14 @@ export function SingleLineDiagram() {
           </span>
           <div>
             <small>Network confidence</small>
-            <strong>40% telemetry coverage</strong>
-            <p>Six configured meters await field data.</p>
+            <strong>
+              {Math.round(
+                (summary.reportingCount / Math.max(1, summary.physicalCount)) *
+                  100,
+              )}
+              % telemetry coverage
+            </strong>
+            <p>{summary.awaitingCount} configured meters await field data.</p>
           </div>
           <button>
             <ChevronRight />
