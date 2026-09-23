@@ -246,7 +246,13 @@ export const ORGANIZATION_LIVE_STATES: MeterLiveState[] = [
   {
     meterId: "m-cc",
     status: "online",
-    lastReading: reading("m-cc", 32, 0.34, 240, 160),
+    lastReading: {
+      ...reading("m-cc", 32, 0.34, 240, 160),
+      voltageV: [6190, 6385, 6502],
+      currentA: [4.1, 7.8, 3.6],
+      voltageUnbalancePct: 2.7,
+      reactiveKvar: 88,
+    },
     lastReadingAt: "2026-09-23T15:10:02+05:00",
   },
   {

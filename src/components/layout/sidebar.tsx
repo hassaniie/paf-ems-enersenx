@@ -86,8 +86,9 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       {
         label: "Power Quality",
         icon: Gauge,
-        href: "#quality",
+        href: "/power-quality",
         roles: OPERATORS,
+        state: "ready",
       },
     ],
   },

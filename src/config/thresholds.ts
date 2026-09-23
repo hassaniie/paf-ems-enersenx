@@ -38,3 +38,12 @@ export const REVERSE_FLOW = {
 
 /** Nominal grid frequency (Hz). */
 export const NOMINAL_FREQUENCY_HZ = 50;
+
+/** PAF power-quality operating bands. */
+export const POWER_QUALITY = {
+  voltageTolerancePct: 5,
+  voltageUnbalanceWarningPct: 2,
+  voltageUnbalanceCriticalPct: 3,
+  frequencyMinHz: 49.5,
+  frequencyMaxHz: 50.5,
+} as const;

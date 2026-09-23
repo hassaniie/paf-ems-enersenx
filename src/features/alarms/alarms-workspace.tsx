@@ -481,8 +481,13 @@ function AlarmDrawer({
             ))}
           </ol>
           <Button asChild variant="ghost" size="sm">
-            <Link href="/meters">
-              Inspect live meter <ArrowUpRight />
+            <Link
+              href={alarm.ruleId === "pf_low" ? "/power-quality" : "/meters"}
+            >
+              {alarm.ruleId === "pf_low"
+                ? "Inspect power quality"
+                : "Inspect live meter"}{" "}
+              <ArrowUpRight />
             </Link>
           </Button>
         </section>
