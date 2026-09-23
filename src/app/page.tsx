@@ -27,7 +27,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { ALARMS } from "@/data/mock/dashboard";
+import { useAlarms } from "@/features/alarms/alarm-provider";
 import { selectEnergySummary } from "@/features/organization/energy-selectors";
 import { useOrganization } from "@/features/organization/organization-provider";
 
@@ -44,6 +44,7 @@ function SectionLink({ href, label }: { href: string; label: string }) {
 
 export default function OverviewPage() {
   const { store } = useOrganization();
+  const { store: alarmStore, attentionCount } = useAlarms();
   const summary = useMemo(() => selectEnergySummary(store), [store]);
   const load = Math.round(summary.activeLoadKw);
   const capacityPct = Math.min(100, (load / 1000) * 100);
@@ -161,7 +162,11 @@ export default function OverviewPage() {
             </span>
             <div>
               <small>System condition</small>
-              <strong>Stable, with 2 exceptions</strong>
+              <strong>
+                {attentionCount
+                  ? `Stable, with ${attentionCount} exceptions`
+                  : "Stable, no active exceptions"}
+              </strong>
             </div>
           </div>
         </section>
@@ -240,7 +245,7 @@ export default function OverviewPage() {
                 <span>Decision queue</span>
                 <h2>Requires attention</h2>
               </div>
-              <b>2</b>
+              <b>{attentionCount}</b>
             </div>
 
             <article className="decision-item decision-critical">
@@ -358,16 +363,16 @@ export default function OverviewPage() {
             />
             <CardBody>
               <div className="event-timeline">
-                {ALARMS.map((alarm, index) => (
+                {alarmStore.alarms.slice(0, 3).map((alarm) => (
                   <article
                     className={`event-row event-${alarm.severity}`}
-                    key={`${alarm.code}-${index}`}
+                    key={alarm.id}
                   >
                     <span className="event-node" />
                     <div>
                       <div className="event-meta">
-                        <code>{alarm.code}</code>
-                        <time>{alarm.time}</time>
+                        <code>{alarm.meterCode}</code>
+                        <time>{alarm.lifecycle}</time>
                       </div>
                       <p>{alarm.message}</p>
                     </div>

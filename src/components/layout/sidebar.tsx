@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import type { UserRole } from "@/components/layout/app-shell";
 import { cn } from "@/lib/cn";
+import { useAlarms } from "@/features/alarms/alarm-provider";
+import { selectEnergySummary } from "@/features/organization/energy-selectors";
+import { useOrganization } from "@/features/organization/organization-provider";
 
 interface NavItem {
   label: string;
@@ -76,9 +79,9 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       {
         label: "Alarms",
         icon: Bell,
-        href: "#alarms",
-        badge: 2,
+        href: "/alarms",
         roles: ALL_ROLES,
+        state: "ready",
       },
       {
         label: "Power Quality",
@@ -139,6 +142,9 @@ export function Sidebar({
   onMobileClose: () => void;
 }) {
   const pathname = usePathname();
+  const { attentionCount } = useAlarms();
+  const { store } = useOrganization();
+  const energy = selectEnergySummary(store);
   return (
     <>
       {mobileOpen ? (
@@ -181,7 +187,8 @@ export function Sidebar({
           <span className="workspace-copy">
             <strong>PAF Base Lahore</strong>
             <small>
-              <i />4 of 10 meters online
+              <i />
+              {energy.reportingCount} of {energy.physicalCount} meters online
             </small>
           </span>
           <ChevronDown className="workspace-chevron" />
@@ -215,7 +222,9 @@ export function Sidebar({
                       >
                         <item.icon />
                         <span>{item.label}</span>
-                        {item.badge ? (
+                        {item.label === "Alarms" && attentionCount ? (
+                          <b className="sidebar-badge num">{attentionCount}</b>
+                        ) : item.badge ? (
                           <b className="sidebar-badge num">{item.badge}</b>
                         ) : null}
                         {!permitted ? (

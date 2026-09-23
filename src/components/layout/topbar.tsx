@@ -24,6 +24,8 @@ import type { UserRole } from "@/components/layout/app-shell";
 import { LiveClock } from "@/components/layout/live-clock";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/cn";
+import { useAlarms } from "@/features/alarms/alarm-provider";
+import type { OperationalAlarm } from "@/data/client/alarm-repository";
 
 const roles: { value: UserRole; description: string }[] = [
   { value: "Admin", description: "Full configuration and access" },
@@ -46,6 +48,7 @@ export function Topbar({
   onMenu: () => void;
 }) {
   const pathname = usePathname();
+  const { store: alarmStore, attentionCount } = useAlarms();
   const [panel, setPanel] = useState<"search" | "alerts" | "profile" | null>(
     null,
   );
@@ -62,7 +65,15 @@ export function Topbar({
   }, []);
 
   const context =
-    pathname === "/power-flow" ? "Live topology" : "Operational overview";
+    (
+      {
+        "/": "Operational overview",
+        "/power-flow": "Live topology",
+        "/organization": "Asset hierarchy",
+        "/meters": "Field telemetry",
+        "/alarms": "Response workflow",
+      } as Record<string, string>
+    )[pathname] ?? "Energy operations";
   return (
     <>
       <header className="app-topbar topbar">
@@ -107,7 +118,7 @@ export function Topbar({
             aria-label="Open notifications"
           >
             <Bell />
-            <b>2</b>
+            {attentionCount ? <b>{attentionCount}</b> : null}
           </button>
           <button
             className={cn("profile-trigger", panel === "profile" && "active")}
@@ -131,10 +142,13 @@ export function Topbar({
         />
       ) : null}
       {panel === "search" ? (
-        <SearchPalette onClose={() => setPanel(null)} />
+        <SearchPalette
+          onClose={() => setPanel(null)}
+          attentionCount={attentionCount}
+        />
       ) : null}
       {panel === "alerts" ? (
-        <AlertsMenu onClose={() => setPanel(null)} />
+        <AlertsMenu onClose={() => setPanel(null)} alarms={alarmStore.alarms} />
       ) : null}
       {panel === "profile" ? (
         <ProfileMenu
@@ -147,7 +161,13 @@ export function Topbar({
   );
 }
 
-function SearchPalette({ onClose }: { onClose: () => void }) {
+function SearchPalette({
+  onClose,
+  attentionCount,
+}: {
+  onClose: () => void;
+  attentionCount: number;
+}) {
   return (
     <div
       className="command-palette"
@@ -179,13 +199,13 @@ function SearchPalette({ onClose }: { onClose: () => void }) {
           </span>
           <small>Live topology</small>
         </Link>
-        <button>
+        <Link href="/alarms" onClick={onClose}>
           <span>
             <TriangleAlert />
             Open active alarms
           </span>
-          <small>2 exceptions</small>
-        </button>
+          <small>{attentionCount} exceptions</small>
+        </Link>
       </div>
       <footer>
         <span>
@@ -200,7 +220,16 @@ function SearchPalette({ onClose }: { onClose: () => void }) {
   );
 }
 
-function AlertsMenu({ onClose }: { onClose: () => void }) {
+function AlertsMenu({
+  onClose,
+  alarms,
+}: {
+  onClose: () => void;
+  alarms: OperationalAlarm[];
+}) {
+  const active = alarms
+    .filter((alarm) => alarm.lifecycle !== "cleared")
+    .slice(0, 3);
   return (
     <div
       className="shell-menu alerts-menu"
@@ -210,33 +239,47 @@ function AlertsMenu({ onClose }: { onClose: () => void }) {
       <header>
         <div>
           <strong>Notifications</strong>
-          <small>2 require attention</small>
+          <small>{active.length} recent open events</small>
         </div>
         <button onClick={onClose}>
           <X />
         </button>
       </header>
-      <div className="alert-menu-item critical">
-        <span>
-          <TriangleAlert />
-        </span>
-        <div>
-          <strong>PF penalty exposure</strong>
-          <p>CAC / CASS has remained at 0.34 PF for 30 minutes.</p>
-          <time>4 min ago</time>
+      {active.map((alarm) => (
+        <Link
+          href="/alarms"
+          onClick={onClose}
+          className={cn("alert-menu-item", alarm.severity)}
+          key={alarm.id}
+        >
+          <span>
+            {alarm.severity === "critical" ? (
+              <TriangleAlert />
+            ) : (
+              <ShieldCheck />
+            )}
+          </span>
+          <div>
+            <strong>{alarm.title}</strong>
+            <p>
+              {alarm.nodeName} · {alarm.meterCode}
+            </p>
+            <time>{alarm.lifecycle}</time>
+          </div>
+        </Link>
+      ))}
+      {!active.length ? (
+        <div className="alert-menu-empty">
+          <Check />
+          <span>
+            <strong>No open alarms</strong>
+            <small>The monitored network is clear.</small>
+          </span>
         </div>
-      </div>
-      <div className="alert-menu-item warning">
-        <span>
-          <ShieldCheck />
-        </span>
-        <div>
-          <strong>CT circuit inspection</strong>
-          <p>Tech Area is reporting voltage with near-zero current.</p>
-          <time>18 min ago</time>
-        </div>
-      </div>
-      <button className="menu-footer-action">View all alarms</button>
+      ) : null}
+      <Link href="/alarms" onClick={onClose} className="menu-footer-action">
+        View all alarms
+      </Link>
     </div>
   );
 }
