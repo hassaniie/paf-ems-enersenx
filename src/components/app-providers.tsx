@@ -5,13 +5,16 @@ import { OrganizationProvider } from "@/features/organization/organization-provi
 import { AlarmProvider } from "@/features/alarms/alarm-provider";
 import { ReportProvider } from "@/features/reports/report-provider";
 import { QuotaProvider } from "@/features/quotas/quota-provider";
+import { UserProvider } from "@/features/users/user-provider";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <OrganizationProvider>
       <AlarmProvider>
         <ReportProvider>
-          <QuotaProvider>{children}</QuotaProvider>
+          <QuotaProvider>
+            <UserProvider>{children}</UserProvider>
+          </QuotaProvider>
         </ReportProvider>
       </AlarmProvider>
     </OrganizationProvider>

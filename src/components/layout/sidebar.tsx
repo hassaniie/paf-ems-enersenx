@@ -121,7 +121,13 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "Administration",
     items: [
-      { label: "Users & Roles", icon: Users, href: "#users", roles: ["Admin"] },
+      {
+        label: "Users & Roles",
+        icon: Users,
+        href: "/users",
+        roles: ["Admin"],
+        state: "ready",
+      },
       {
         label: "Audit Log",
         icon: ScrollText,
