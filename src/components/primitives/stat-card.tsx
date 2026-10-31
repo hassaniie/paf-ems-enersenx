@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { MiniArea } from "@/components/primitives/mini-area";
 import { cn } from "@/lib/cn";
 
 export interface StatDelta {
@@ -14,15 +13,20 @@ export interface StatCardProps {
   label: string;
   value: string;
   unit?: string;
+  /** What the figure compares against, e.g. "vs yesterday". Always shown. */
   sub?: string;
   icon?: LucideIcon;
   /** A CSS color for the corner status dot (e.g. "var(--status-faulty)"). */
   statusColor?: string;
   delta?: StatDelta;
-  spark?: { data: number[]; color?: string };
   valueClassName?: string;
 }
 
+/**
+ * A stat card is a number: label, figure, and what it compares to — nothing
+ * added to fill it. (unslop pass: no sparkline/mini-chart decoration here —
+ * the one real chart on the screen is the site-load area chart.)
+ */
 export function StatCard({
   label,
   value,
@@ -31,7 +35,6 @@ export function StatCard({
   icon: Icon,
   statusColor,
   delta,
-  spark,
   valueClassName,
 }: StatCardProps) {
   return (
@@ -42,7 +45,7 @@ export function StatCard({
             <Icon className="size-4.5" />
           </span>
         ) : (
-          <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+          <span className="text-[13px] font-medium text-muted-foreground">
             {label}
           </span>
         )}
@@ -58,7 +61,7 @@ export function StatCard({
       </div>
 
       {Icon ? (
-        <span className="mt-4 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+        <span className="mt-4 text-[13px] font-medium text-muted-foreground">
           {label}
         </span>
       ) : null}
@@ -81,21 +84,8 @@ export function StatCard({
         ) : null}
       </div>
 
-      {spark ? (
-        <div className="mt-4">
-          <MiniArea data={spark.data} color={spark.color} />
-        </div>
-      ) : null}
-
       {sub ? (
-        <p
-          className={cn(
-            "text-[13px] text-muted-foreground",
-            spark ? "mt-3" : "mt-2",
-          )}
-        >
-          {sub}
-        </p>
+        <p className="mt-2 text-[13px] text-muted-foreground">{sub}</p>
       ) : null}
     </Card>
   );

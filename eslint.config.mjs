@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "coverage/**",
     "next-env.d.ts",
+    // Vendored third-party skill content (pulled verbatim) — not our source.
+    ".claude/skills/**",
   ]),
 ]);
 

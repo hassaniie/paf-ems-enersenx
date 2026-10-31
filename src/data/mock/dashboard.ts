@@ -10,6 +10,7 @@ import type { AlarmItemData } from "@/components/primitives/alarm-item";
 import type { FeederRow } from "@/components/primitives/feeder-table";
 import type { LoadPoint } from "@/components/charts/load-area";
 import type { ProgressRowData } from "@/components/primitives/progress-list";
+import type { SldNode } from "@/components/primitives/site-diagram";
 import type { StatCardProps } from "@/components/primitives/stat-card";
 
 export const KPIS: StatCardProps[] = [
@@ -19,10 +20,7 @@ export const KPIS: StatCardProps[] = [
     unit: "kW",
     icon: Zap,
     delta: { text: "4%", dir: "up" },
-    spark: {
-      data: [420, 440, 460, 470, 510, 540, 560, 553],
-      color: "var(--viz-1)",
-    },
+    sub: "vs yesterday at this hour",
   },
   {
     label: "Energy Today",
@@ -30,10 +28,7 @@ export const KPIS: StatCardProps[] = [
     unit: "MWh",
     icon: Activity,
     delta: { text: "2%", dir: "down", good: true },
-    spark: {
-      data: [0, 1.1, 2.6, 3.9, 5.3, 6.9, 7.9, 8.74],
-      color: "var(--viz-3)",
-    },
+    sub: "vs yesterday's total",
   },
   {
     label: "Grid Export Today",
@@ -41,7 +36,8 @@ export const KPIS: StatCardProps[] = [
     unit: "kWh",
     icon: SunMedium,
     valueClassName: "text-export",
-    spark: { data: [0, 0, 3, 18, 40, 32, 24, 18], color: "var(--flow-export)" },
+    delta: { text: "12%", dir: "up" },
+    sub: "Net-metering credit vs yesterday",
   },
   {
     label: "Avg Power Factor",
@@ -85,6 +81,93 @@ export const FEEDER_LOAD: ProgressRowData[] = [
     value: "1 kW",
     pct: 1,
     color: "var(--viz-3)",
+  },
+];
+
+/** Site topology for the single-line diagram — same facts as FEEDERS, shaped
+ * as a tree so the diagram can render the real hierarchy, not a flat list. */
+export const SITE_TREE: SldNode[] = [
+  {
+    code: "IC-HT-01",
+    name: "Iqbal Camp",
+    cls: "HT",
+    transport: "wifi",
+    status: "online",
+    powerKw: 1,
+    pf: 0.86,
+  },
+  {
+    code: "OM-HT-01",
+    name: "Officers Mess",
+    cls: "HT",
+    transport: "wifi",
+    status: "awaiting-data",
+  },
+  {
+    code: "SC-HT-01",
+    name: "Officers Colony / Siddiqui",
+    cls: "HT",
+    transport: "wifi",
+    status: "awaiting-data",
+  },
+  {
+    code: "TA-HT-01",
+    name: "Tech Area",
+    cls: "HT",
+    transport: "modbus",
+    status: "faulty",
+    children: [
+      {
+        code: "ND-HT-01",
+        name: "NASTP Delta Ph-III",
+        cls: "HT",
+        transport: "modbus",
+        status: "online",
+        powerKw: 544,
+        pf: 0.95,
+        children: [
+          {
+            code: "CC-HT-01",
+            name: "CAC / CASS",
+            cls: "HT",
+            transport: "modbus",
+            status: "online",
+            powerKw: -18,
+            pf: 0.34,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    code: "QC-HT-01",
+    name: "Qureshi Camp",
+    cls: "HT",
+    transport: "lorawan",
+    status: "awaiting-data",
+    children: [
+      {
+        code: "PH-LT-01",
+        name: "PAF Hospital LT-1",
+        cls: "LT",
+        transport: "lorawan",
+        status: "awaiting-data",
+      },
+      {
+        code: "PH-LT-02",
+        name: "PAF Hospital LT-2",
+        cls: "LT",
+        transport: "lorawan",
+        status: "awaiting-data",
+      },
+      {
+        code: "PH-LT-03",
+        name: "PAF Hospital LT-3",
+        cls: "LT",
+        transport: "lorawan",
+        status: "awaiting-data",
+      },
+    ],
   },
 ];
 

@@ -3,15 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { StatCard } from "@/components/primitives/stat-card";
 import { ProgressList } from "@/components/primitives/progress-list";
-import { FeederTable } from "@/components/primitives/feeder-table";
+import { SiteDiagram } from "@/components/primitives/site-diagram";
 import { AlarmItem } from "@/components/primitives/alarm-item";
 import { LoadArea } from "@/components/charts/load-area";
 import {
   ALARMS,
-  FEEDERS,
   FEEDER_LOAD,
   KPIS,
   LOAD_SERIES,
+  SITE_TREE,
 } from "@/data/mock/dashboard";
 
 function LegendDot({ color, label }: { color: string; label: string }) {
@@ -69,21 +69,19 @@ export default function OverviewPage() {
           </Card>
         </section>
 
-        {/* table + alarms */}
+        {/* hierarchy + alarms */}
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
-            <CardHeader
-              title="Sites & Feeders"
-              subtitle="Live metering hierarchy"
-              action={
-                <span className="num text-[13px] text-muted-foreground">
-                  <span className="text-online">4</span> / 10 online
-                </span>
-              }
-            />
-            <div className="border-t border-border">
-              <FeederTable rows={FEEDERS} />
-            </div>
+            <CardHeader title="Site hierarchy" subtitle="Single-line diagram" />
+            <CardBody className="pt-0">
+              <SiteDiagram
+                siteName="Lahore Site"
+                totalKw={553}
+                onlineCount={3}
+                totalCount={10}
+                nodes={SITE_TREE}
+              />
+            </CardBody>
           </Card>
 
           <Card>

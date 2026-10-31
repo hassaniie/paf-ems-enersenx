@@ -1,15 +1,16 @@
 /*
- * Enersenx EMS — Design Tokens (Atlas/ReUI-aligned)
+ * Enersenx EMS — Design Tokens
  * =================================================
- * Reproduces the ReUI "Atlas" design system locally (reui.io is blocked by
- * this environment's network policy, so the packages can't be pulled here —
- * these tokens mirror ReUI's neutral shadcn-compatible theme 1:1 so real ReUI
- * components would drop in unchanged if the registry is later allowlisted).
+ * shadcn/ReUI-compatible token shape, tinted toward the product's own world
+ * rather than a generic neutral grey (unslop pass, see docs/ for the audit):
+ * an electrical control room / instrument panel — "ink" world. Values are
+ * the unslop skill's own documented ink ramp (.claude/skills/unslop/
+ * references/tokens.md), not invented hexes.
  *
  * TWO LAYERS (docs/domain-model.md §10):
  *   1. NEUTRAL + STATUS  → constant across tenants. Safety-critical status
- *      colors live here and are NEVER themed.
- *   2. BRAND             → per-tenant, overridable. Restrained, like Atlas.
+ *      colors live here and are NEVER themed, and are untouched by the tint.
+ *   2. BRAND             → per-tenant, overridable.
  *
  * Dark-first; light is first-class via :root[data-theme="light"].
  * Status + categorical colors are validated with the dataviz method.
@@ -21,27 +22,27 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* ===================== NEUTRAL (shadcn/ReUI convention) ================= */
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --card: #141414;
-  --card-foreground: #fafafa;
-  --popover: #1a1a1a;
-  --popover-foreground: #fafafa;
-  --primary: #fafafa;
-  --primary-foreground: #0a0a0a;
-  --secondary: #232323;
-  --secondary-foreground: #fafafa;
-  --muted: #1a1a1a;
-  --muted-foreground: #a1a1a1;
-  --accent: #262626;
-  --accent-foreground: #fafafa;
-  --border: #262626;
-  --input: #2a2a2a;
-  --ring: #525252;
+  /* ===================== NEUTRAL — ink ramp (dark) ========================= */
+  --background: #0b0d14;
+  --foreground: #eef0f5;
+  --card: #11141c;
+  --card-foreground: #eef0f5;
+  --popover: #1a1e28;
+  --popover-foreground: #eef0f5;
+  --primary: #eef0f5;
+  --primary-foreground: #0b0d14;
+  --secondary: #1a1e28;
+  --secondary-foreground: #eef0f5;
+  --muted: #11141c;
+  --muted-foreground: #a3a9b8;
+  --accent: #1a1e28;
+  --accent-foreground: #eef0f5;
+  --border: rgba(238, 240, 245, 0.08);
+  --input: rgba(238, 240, 245, 0.12);
+  --ring: #3a4150;
 
   /* nested / elevated surface (icon squares, table header, chips) */
-  --elevated: #1f1f1f;
+  --elevated: #1a1e28;
 
   /* ===================== STATUS (never themed) ============================ */
   --status-online: #16a34a;
@@ -78,25 +79,25 @@
 }
 
 :root[data-theme="light"] {
-  --background: #fbfbfb;
-  --foreground: #0a0a0a;
+  --background: #f5f7fa;
+  --foreground: #111827;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #111827;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #171717;
-  --primary-foreground: #fafafa;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #171717;
-  --muted: #f6f6f6;
-  --muted-foreground: #737373;
-  --accent: #f1f1f2;
-  --accent-foreground: #171717;
-  --border: #e6e6e6;
-  --input: #e6e6e6;
-  --ring: #a3a3a3;
+  --popover-foreground: #111827;
+  --primary: #111827;
+  --primary-foreground: #f5f7fa;
+  --secondary: #eceff4;
+  --secondary-foreground: #111827;
+  --muted: #eceff4;
+  --muted-foreground: #4b5565;
+  --accent: #eceff4;
+  --accent-foreground: #111827;
+  --border: rgba(17, 24, 39, 0.08);
+  --input: rgba(17, 24, 39, 0.12);
+  --ring: #9aa6ba;
 
-  --elevated: #f4f4f5;
+  --elevated: #eceff4;
 
   --status-online: #15803d;
   --status-offline: #71717a;

@@ -162,7 +162,7 @@ function Th({
   return (
     <th
       className={cn(
-        "py-2.5 pr-4 text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+        "py-2.5 pr-4 text-[13px] font-medium text-muted-foreground",
         className,
       )}
     >
